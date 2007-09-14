@@ -1,0 +1,42 @@
+#log {
+  padding-bottom: 1em;
+  border-bottom: 2px solid #000000;
+  margin-bottom: 2em;
+}
+
+#logsummary {
+  margin-bottom: 1em;
+  padding: 1ex;
+  border: 1px solid #e3e3e3;
+  font-weight: bold;
+  background:#f7f7f7;
+}
+
+#logtable {
+  width:100%;
+  border-collapse: collapse;
+  border: 1px solid #666666;
+}
+
+#logtable td, #logtable th {
+  text-align: left;
+  padding: 3px 8px;
+  border: 1px solid #666666;
+}
+
+#logtable td {
+    border-bottom: 1px dotted #666666;
+    border-top: 1px dotted #666666;
+}
+
+#logtable .passed {
+  background-color: #ccffcc;
+}
+
+#logtable .failed, #logtable .error {
+  background-color: #ffcccc;
+}
+
+#logtable .nameCell {
+  cursor: pointer;
+}

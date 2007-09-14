@@ -1,0 +1,96 @@
+/********************************* LiveValidation *************************************/
+
+.LV_valid {
+    color:#00CC00;
+}
+	
+.LV_invalid {
+	color:#CC0000;
+}
+	
+.LV_validation_message{
+    font-weight:bold;
+    margin:0 0 0 5px;
+}
+    
+.LV_valid_field,
+input.LV_valid_field:hover, 
+input.LV_valid_field:active,
+textarea.LV_valid_field:hover, 
+textarea.LV_valid_field:active,
+.fieldWithErrors input.LV_valid_field,
+.fieldWithErrors textarea.LV_valid_field {
+    border: 1px solid #00CC00;
+}
+    
+.LV_invalid_field, 
+input.LV_invalid_field:hover, 
+input.LV_invalid_field:active,
+textarea.LV_invalid_field:hover, 
+textarea.LV_invalid_field:active,
+.fieldWithErrors input.LV_invalid_field,
+.fieldWithErrors textarea.LV_invalid_field {
+    border: 1px solid #CC0000;
+}
+
+
+/********** Error reporting ************/
+
+.fieldWithErrors, .fieldWithNoErrors, .fieldWithNoActivityYet {
+  /*padding: 2px;*/
+  background-color: transparent;
+  /*display: table;*/
+  /*float:left;*/
+  /*margin-bottom:10px;*/
+}
+
+.fieldWithErrors {
+  /*background-color: #ffcccc;*/
+}
+
+.fieldWithNoErrors {
+  /*background-color: #C6E0B0;*/
+}
+
+.fieldWithErrors input, .fieldWithErrors select, fieldWithErrors textarea {
+  /*background-color: #ffcccc;*/
+  border-color:#CC0000;
+}
+
+p.matchFieldWithErrorReporting {
+  /*padding-left:2px;*/
+}
+
+#errorExplanation {
+  /*width: 98%;*/
+  border: 2px solid #ffcccc;
+  padding: 7px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  color: #ff0000;
+}
+
+#errorExplanation h2 {
+  text-align: left;
+  font-weight: bold;
+  padding: 5px 5px 5px 15px;
+  font-size: 110%;
+  margin: -7px;
+  background-color: #fff;
+  color: #ff0000;
+  letter-spacing:-1px;
+}
+
+#errorExplanation ul {
+  padding-left:20px;
+}
+
+#errorExplanation p {
+  margin-bottom: 0;
+  padding: 5px;
+}
+
+#errorExplanation ul li {
+  font-size: 12px;
+  list-style: disc;
+}

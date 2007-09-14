@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LiveValidation functional tests (standalone version)</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  
+  <link rel="stylesheet" href="../css/standard.css" type="text/css" />
+  <link rel="stylesheet" href="../css/test.css" type="text/css" />
+  <link rel="stylesheet" href="../css/validation.css" type="text/css" />
+  
+  <!--  the LiveValidation source to be tested -->
+  <script type="text/javascript" src="../../src/livevalidation_standalone.js"></script>
+  
+  <style type="text/css">
+    .section h3 { background-color:#cccccc; padding:3px; }
+    input.submit { color: #666666; }
+  </style>
+  
+</head>
+<body>
+  
+  <h1>LiveValidation functional tests (standalone version)</h1>
+  
+  <p>Functional tests for Validate and LiveValidation classes (standalone version)</p>
+
+  <div class="section" id="examplePresence">
+	   <h3>Presence</h3>
+		 <p>Presence will fail if there is no value entered in the field.</p>
+		 <p>Enter the field then click somewhere else: 
+		   <input type="text" id="f1" />
+		   <script type="text/javascript">
+		     var f1 = new LiveValidation('f1');
+		     f1.add(Validate.Presence);
+		   </script>  
+		 </p>
+  </div>
+
+  <div class="section" id="exampleFormat">
+	  <h3>Format</h3>
+		<p>Format will fail if the value does not match the regular expression.</p>
+		<p>Should contain the phrase &ldquo;live&rdquo;, anywhere, in any case: 
+		  <input type="text" id="f2" />
+		  <script type="text/javascript">
+		     var f2 = new LiveValidation('f2');
+		     f2.add(Validate.Format, { pattern: /live/i });
+		  </script>  
+    </p>
+  </div>
+  
+  <div class="section" id="exampleNumericality">
+	  <h3>Numericality</h3>
+		<p>This kind of validation is concerned with numbers. It can handle scientific numbers (ie. 2e3, being 2000), floats (numbers with a decimal place), and negative numbers properly as you would expect it to throughout, both in values and parameters.</p>
+		<h4>Basic</h4>
+		<p>This example will check if the value provided is a number, or can be converted into a number successfully (ie from a string - the value of a text input is a string). This is performed on every type of Numericality validation automatically, but can be used in its simplest form like this, if you only want to make sure the value entered is a number.</p>
+		<p>Should be a number: 
+		  <input type="text" id="f3" />
+			<script type="text/javascript">
+		    var f3 = new LiveValidation('f3');
+		    f3.add(Validate.Numericality);
+		  </script>  
+		</p>
+			  
+		<h4>Only allow integers</h4>
+		<p>This example will check that the number supplied is, or equates to, an integer (ie. no decimal places).</p>
+		<p>Should be an integer: 
+		  <input type="text" id="f4" />
+			<script type="text/javascript">
+		    var f4 = new LiveValidation('f4');
+		    f4.add(Validate.Numericality, { onlyInteger: true } );
+		  </script>  
+		</p>
+			  
+		<h4>Specific number</h4>
+		<p>This example will check that the value is the same as, or equates to, a specific number that you supply.</p>
+		<p>Should be 2000 (or scientific representation of it, 2e3): 
+		  <input type="text" id="f5" />
+			<script type="text/javascript">
+		    var f5 = new LiveValidation('f5');
+		    f5.add(Validate.Numericality, { is: 2000 } );
+		  </script>  
+	  </p>
+
+		<h4>Higher than or equal to a minimum number</h4>
+		<p>This example will check that the value is more than or equal to a minimum number that you supply.</p>
+		<p>Should be 2000 or higher (or scientific representation of it, 2e3): 
+		  <input type="text" id="f6" />
+			<script type="text/javascript">
+		    var f6 = new LiveValidation('f6');
+		    f6.add(Validate.Numericality, { minimum: 2000 } );
+		  </script>  
+		</p>
+			  
+		<h4>Lower than or equal to a maximum number</h4>
+		<p>This example will check that the value is less than or equal to a maximum number that you supply.</p>
+		<p>Should be 2000 or lower (or scientific representation of it, 2e3): 
+		  <input type="text" id="f7" />
+			<script type="text/javascript">
+		    var f7 = new LiveValidation('f7');
+		    f7.add(Validate.Numericality, { maximum: 2000 } );
+		  </script>  
+		</p>
+			  
+		<h4>Within a range of numbers</h4>
+		<p>This example will check that the value is a number that falls within a range that you supply. This is done supplying both a &lsquo;minimum&rsquo; and &lsquo;maximum&rsquo;.</p>
+		<p>Should be between 2000 and 2003: 
+		  <input type="text" id="f8" />
+			<script type="text/javascript">
+		    var f8 = new LiveValidation('f8');
+		    f8.add(Validate.Numericality, { minimum: 2000, maximum: 2003 } );
+		  </script>  
+	  </p>
+			  
+		<h4>Combination</h4>
+		<p>Most of the above parameters can be combined, the only execption being that you cannot combine &lsquo;is&rsquo; with &lsquo;minimum&rsquo; or &lsquo;maximum&rsquo;, if this is done &lsquo;is&rsquo; will take precedence. This example will check that the value is a number that falls within a range that you supply, and that it is an integer. This is done supplying both a &lsquo;minimum&rsquo; and &lsquo;maximum&rsquo;, and true for &lsquo;onlyInteger&rsquo;.</p>
+		<p>Should be between 2000 and 2003, and also be an integer: 
+		  <input type="text" id="f9" />
+			<script type="text/javascript">
+		    var f9 = new LiveValidation('f9');
+		    f9.add(Validate.Numericality, { minimum: 2000, maximum: 2003, onlyInteger: true } );
+		  </script>  
+	  </p>
+  </div>
+  
+  <div class="section" id="exampleLength">
+    <h3>Length</h3>
+		<p>Length is concerned with the number of characters in a value. You can do various validations on it, like check it is a specific length, less than or equal to a maximum length, greater than or equal to a minimum length, or falls within a range of lengths.</p>
+			  
+		<h4>Specific length</h4>
+		<p>This example will check that the value is the exact length of which you supply.</p>
+		<p>Should be 4 characters in length: 
+		  <input type="text" id="f10" />
+		  <script type="text/javascript">
+		    var f10 = new LiveValidation('f10');
+		    f10.add(Validate.Length, { is: 4 } );
+		  </script>  
+		</p>
+			  
+		<h4>Longer than or equal to a minimum length</h4>
+		<p>This example will check that the value is more than or equal to a minimum length that you supply.</p>
+		<p>Should be 4 or more characters in length: 
+		  <input type="text" id="f11" />
+			<script type="text/javascript">
+		    var f11 = new LiveValidation('f11');
+		    f11.add(Validate.Length, { minimum: 4 } );
+		  </script>  
+		</p>
+			  
+	  <h4>Shorter than or equal to a maximum length</h4>
+		<p>This example will check that the value is less than or equal to a maximum length that you supply.</p>
+		<p>Should be 4 or less characters in length: 
+		  <input type="text" id="f12" />
+			<script type="text/javascript">
+		    var f12 = new LiveValidation('f12');
+		    f12.add(Validate.Length, { maximum: 4 } );
+		  </script>  
+		</p>
+			  
+	  <h4>Within a range of lengths</h4>
+		<p>This example will check that the value is a number that falls within a range that you supply. This is done supplying both a &lsquo;minimum&rsquo; and &lsquo;maximum&rsquo;.</p>
+		<p>Should be between 4 and 8 characters in length: 
+		  <input type="text" id="f13" />
+			<script type="text/javascript">
+		    var f13 = new LiveValidation('f13');
+		    f13.add(Validate.Length, { minimum: 4, maximum: 8 } );
+		  </script>  
+	  </p>
+  </div>
+
+  <div class="section" id="exampleInclusion">
+	  <h3>Inclusion</h3>
+		<p>Inclusion lets you validate against a list of allowed values. You can do an exact match or a partial match.</p>
+			  
+		<h4>Exact match</h4>
+		<p>This example will check that the value is the same as any in your allowed values.</p>
+		<p>Should be &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo;: 
+		  <input type="text" id="f14" />
+			<script type="text/javascript">
+		    var f14 = new LiveValidation('f14');
+		    f14.add(Validate.Inclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ] } );
+		  </script>  
+		</p>
+			  
+		<h4>Partial match</h4>
+		<p>This example will check that any part of the value matches something in the allowed list. Allow this by setting the &lsquo;partialMatch&rsquo; to be true.</p>
+		<p>Should contain &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo; somewhere in your entry: 
+		  <input type="text" id="f15" />
+			<script type="text/javascript">
+		    var f15 = new LiveValidation('f15');
+		    f15.add(Validate.Inclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], partialMatch: true } );
+		  </script>  
+	  </p>
+  </div>	
+  
+  <div class="section" id="exampleExclusion">
+	  <h3>Exclusion</h3>
+		<p>Exclusion lets you validate against a list of values that are not allowed. You can do an exact match or a partial match.</p>
+			  
+		<h4>Exact match</h4>
+		<p>This example will check that the value is not the same as any in your allowed values.</p>
+		<p>Should not be &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo;: 
+		  <input type="text" id="f16" />
+			<script type="text/javascript">
+		    var f16 = new LiveValidation('f16');
+		    f16.add(Validate.Exclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ] } );
+		  </script>  
+	  </p>
+			  
+	  <h4>Partial match</h4>
+		<p>This example will check that no part of the value matches something in the disallowed list. Allow this by setting the &lsquo;partialMatch&rsquo; to be true.</p>
+		<p>Should not contain &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo; anywhere in your entry: 
+		  <input type="text" id="f17" />
+			<script type="text/javascript">
+		    var f17 = new LiveValidation('f17');
+		    f17.add(Validate.Exclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], partialMatch: true } );
+		  </script>  
+    </p>
+  </div>
+  
+  <div class="section" id="exampleAcceptance">
+	  <h3>Acceptance</h3>
+		<p>Acceptance lets you validate that a checkbox has been checked.</p>
+		<p>I accept that LiveValidation is the validation of my dreams: 
+		  <input type="checkbox" id="f18" value="1" class="checkbox" />
+			<script type="text/javascript">
+		    var f18 = new LiveValidation('f18');
+		    f18.add(Validate.Acceptance );
+		  </script>  
+	  </p>
+  </div>	 
+  
+  <div class="section" id="exampleConfirmation">
+	  <h3>Confirmation</h3>
+		<p>This is used to check that the value of the confirmation field matches that of another field. 
+The most common use for this is for passwords, as demonstrated below, but will work just as well on other field types.</p>
+		<p>Enter a password: 
+		  <input type="password" id="myPasswordField" />
+			<br />
+			Confirm password:
+		  <input type="password" id="f19" />
+			<script type="text/javascript">
+		    var f19 = new LiveValidation('f19');
+		    f19.add(Validate.Confirmation, { match: 'myPasswordField'} );
+		  </script>  
+    </p>
+  </div>	 
+  
+  <div class="section" id="exampleEmail">
+	  <h3>Email</h3>
+		<p>The email validation is not a real kind of validation in the sense that it actually uses the Validate.Format function to do its validation.
+It is essentially a validation that is done often enough to merit its own function so you don&rsquo;t have to remember the long regular expression and 
+custom failureMessage each time you want to validate an email.</p>
+		<p>It also serves as an example for the more adventurous of you, who want to make your own library of custom validations that you will 
+ use often. These will most likely include things like postcodes, telephone numbers, dates etc. which vary
+ far too widely to include here, but it was felt that email addresses are generic enough to warrant inclusion, so here you go.</p>
+		<p>Should be an email address: 
+		  <input type="text" id="f20" />
+			<script type="text/javascript">
+		    var f20 = new LiveValidation('f20');
+		    f20.add(Validate.Email );
+		  </script>  
+	  </p>
+	</div>
+  
+  <div class="section" id="exampleComposite">
+	  <h3>Composite validations (combining validations)</h3>
+		<p>Most of the time, you will want to combine multiple types of validation on a single field. As your user is given real-time feedback,
+ it would also be good to be able to specify an order in which they fail, so that the most appropriate message is displayed to avoid any confusion.</p>
+ 		<p>LiveValidation makes this easy. You simply keep adding validations to the same LiveValidation object, and they will fail in the order they 
+are added.</p>
+    <p>The most usual combination you will use is Validate.Presence with one or more other validations, as only Validate.Presence, Validate.Confirmation
+and Validate.Acceptance will fail and display their message on an empty field. This is because it is common to have fields which are optional, but if the user decides
+ to provide information, then it must be less than a certain length etc. Therefore if you want to ensure a field is filled in, you must add a Validate.Presence, 
+ then if you require any more validation types add them too.</p>
+    <p>You have already seen an example of a composite validation in the homepage example. The following example checks that the field is not empty, 
+then checks that it is an email address, and then makes sure it is between 10 and 20 characters long.</p>
+		<p>Enter an email address (10 - 20 characters long): 
+		  <input type="text" id="f21" />
+		  <script type="text/javascript">
+		    var f21 = new LiveValidation('f21');
+		    f21.add( Validate.Presence );
+			  f21.add( Validate.Email );
+		    f21.add(Validate.Length, { minimum: 10, maximum: 20 } );
+		  </script>  
+    </p>
+  </div>
+
+  <div class="section" id="exampleForms">
+		<h3>Validating entire forms</h3>
+		<p>To validate an entire form we use the LiveValidation.massValidate static function. First set up fields that you want validating 
+to be LiveValidation objects, as we have been doing above. Then to validate them as a whole, simply call LiveValidation.massValidate passing it an array 
+containing references to these objects. This will return true if all the fields were valid, and false if any fail, but if one fails it will remember this and 
+carry on doing all the validations, so that the appropriate messages are shown for each field, so your user can easily see on the form which fields
+ were invalid.</p>
+ 		<p>This however is not all that useful on its own, as the form will still continue submitting unless we intercept it. This is done by returning the
+whether massValidation failed or passed, from the onsubmit event of the form.</p>
+		<p>As an example, here a form will be wired up in this way, but as we dont actually have anywhere to submit the form to, we will stop the form
+from submitting, and then instead we will alert out whether the form is valid or not. <strong>NB this is for demonstration only, and should not be copied for your production 
+forms, as this form will not submit even if valid (unless of course javascript is turned off - one of the resons that server-side validation should always be performed as well)</strong>. Note that the email field has no validation that it is present, therefore if this is not filled in, the form
+will still be valid, as it will be treated as an optional field.</p>
+		<form action="#" method="post" id="myForm">
+			<fieldset>
+			  <legend>Example of form validation</legend>
+				<p><label for="field1">Email:</label><br /><input type="text" id="field1" /></p>
+				<p><label for="field2">Acceptance:</label><br /><input type="checkbox" id="field2" class="checkbox" /></p>
+				<p><label for="field3">Presence:</label><br /><textarea  id="field3" class="shallow" rows="2" cols="10"></textarea></p>
+		    <p><input type="submit" class="submit" value="Test me!" /></p>
+		  </fieldset>
+		</form>
+    <script type="text/javascript">
+		  // create some LiveValidation fields
+			var field1 = new LiveValidation( 'field1' );
+			field1.add( Validate.Email );
+			var field2 = new LiveValidation( 'field2' );
+			field2.add( Validate.Acceptance );
+			var field3 = new LiveValidation( 'field3' );
+			field3.add( Validate.Presence );
+			// get the form
+			var form = document.getElementById( 'myForm' );
+			// make it validate the form on its onsubmit event, and return whether
+			form.onsubmit = function(e){
+						                                  alert('Is everything valid? ' + LiveValidation.massValidate( [ field1, field2, field3 ] ) );  
+															                return false;
+						                                }
+	  </script> 
+  </div>
+
+</body>
+</html>
