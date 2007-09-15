@@ -106,7 +106,7 @@ LiveValidation.prototype = {
       // possibly remove classnames, and message to avoid confusion while typing
       //if(this.wait >= 300) this.removeMessageAndFieldClass();
       if(this.timeout) clearTimeout(this.timeout);
-      if(this.wait > 0) this.timeout = setTimeout(this.validate.bind(this), this.wait);  
+      this.timeout = setTimeout(this.validate.bind(this), this.wait);
     },
     
     /**

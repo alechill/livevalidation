@@ -36,7 +36,7 @@ LiveValidation.CHECKBOX 		= 4;
  *	@return {Bool} - true if all passed validation, false if any fail						
  */
 LiveValidation.massValidate = function(validations){
-  	var returnValue = true;
+  var returnValue = true;
 	for(var i = 0, len = validations.length; i < len; ++i ){
 		var valid = validations[i].validate();
 		if(returnValue) returnValue = valid;
@@ -52,31 +52,33 @@ LiveValidation.massValidate = function(validations){
  * @var - Same as constructor above
  */
 LiveValidation.prototype.initialize = function(element, optionsObj){
-  	var self = this;
-  	if(!element) throw new Error("LiveValidation::initialize - No element reference or element id has been provided!");
+  var self = this;
+  if(!element) throw new Error("LiveValidation::initialize - No element reference or element id has been provided!");
 	this.element = element.nodeName ? element : document.getElementById(element);
 	if(!this.element) throw new Error("LiveValidation::initialize - No element with reference or id of '" + element + "' exists!");
 	var options = optionsObj || {};
 	this.validMessage = options.validMessage || 'Thankyou!';
 	this.insertAfterWhatNode = options.insertAfterWhatNode || this.element;
-  	this.onValid = options.onValid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };
-  	this.onInvalid = options.onInvalid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };	
-	this.message;
+  this.onValid = options.onValid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };
+  this.onInvalid = options.onInvalid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };	
+	this.onlyOnBlur =  options.onlyOnBlur || false;
+	this.wait = options.wait || 0;
 	this.validations = [];
 	this.validClass = 'LV_valid';
 	this.invalidClass = 'LV_invalid';
-    this.validFieldClass = 'LV_valid_field';
+  this.validFieldClass = 'LV_valid_field';
 	this.invalidFieldClass = 'LV_invalid_field';
-    this.messageClass = 'LV_validation_message';
-  	this.elementType = this.getElementType();
-  	this.displayMessageWhenEmpty = false;
-  	this.validationFailed = false;
-  	if(this.elementType == LiveValidation.CHECKBOX){
-	    this.element.onchange = function(e){ self.validate(); }
+  this.messageClass = 'LV_validation_message';
+  this.elementType = this.getElementType();
+  this.displayMessageWhenEmpty = false;
+  this.validationFailed = false;
+	this.element.onfocus = function(e){ self.doOnFocus(); }
+  if(this.elementType == LiveValidation.CHECKBOX){
+	  this.element.onchange = function(e){ self.validate(); }
 		this.element.onclick = function(e){ self.validate(); }
 	}else{
-	  	this.element.onkeyup = function(e){ self.validate(); }
-	  	this.element.onblur = function(e){ self.validate(); }
+	  if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); }
+	  this.element.onblur = function(e){ self.doOnBlur(); }
 	}
 }
 
@@ -88,8 +90,34 @@ LiveValidation.prototype.initialize = function(element, optionsObj){
  * @return {Object} - the LiveValidation object itself so that calls can be chained
  */
 LiveValidation.prototype.add = function(validationFunction, validationParamsObj){
-  	this.validations.push( {type: validationFunction, params: validationParamsObj || {} } );
-    return this;
+  this.validations.push( {type: validationFunction, params: validationParamsObj || {} } );
+  return this;
+}
+
+/**
+ * makes the validation wait the alotted time from the last keystroke 
+ */
+LiveValidation.prototype.deferValidation = function(e){
+  // possibly remove classnames, and message to avoid confusion while typing
+  //if(this.wait >= 300) this.removeMessageAndFieldClass();
+	var self = this;
+  if(this.timeout) clearTimeout(self.timeout);
+  this.timeout = setTimeout( function(){ self.validate() }, self.wait); 
+}
+    
+/**
+ * sets the focused flag to false when field loses focus 
+ */
+LiveValidation.prototype.doOnBlur = function(e){
+  this.focused = false;
+  this.validate(e);
+}
+    
+/**
+ * sets the focused flag to true when field gains focus 
+ */
+LiveValidation.prototype.doOnFocus = function(e){
+  this.focused = true;
 }
 
 /**
@@ -180,7 +208,7 @@ LiveValidation.prototype.validateElement = function(validationFunction, validati
  * @return {Boolean} - whether the all the validations passed or if one failed
  */
 LiveValidation.prototype.validate = function(){
-  	var isValid = this.doValidations();
+  var isValid = this.doValidations();
 	if(isValid){
 		this.onValid();
 		return true;

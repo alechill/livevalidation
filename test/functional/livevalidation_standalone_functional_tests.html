@@ -325,5 +325,31 @@ will still be valid, as it will be treated as an optional field.</p>
 	  </script> 
   </div>
 
+	<div class="section" id="exampleOptions">
+		<h3>LiveValidation options</h3>
+		<p>There are various options that can be overriden when instatiating a LiveValidation object.</p>
+		<h4>onlyOnBlur</h4>
+		<p>Setting onlyOnBlur to be true will mean the validation will only be run when the field loses focus.</p>
+		<p>Must be filled in:
+		  <input type="text" id="f22" />
+		  <script type="text/javascript">
+		    var f22 = new LiveValidation('f22', {onlyOnBlur: true});
+		    f22.add( Validate.Presence );
+		  </script>  
+		</p>
+		<h4>wait</h4>
+		<p>Setting wait to a number (of milliseconds), will mean that the validation will not run until your chosen time after the last keystroke ocurred.
+This allows the user to type in their data without saying it has failed before they have had the chance to finish, by which time it may be valid, but 
+it will still be validated without having to leave the field.</p>
+		<p>Must be filled in, and at least 10 characters long:
+		  <input type="text" id="f23" />
+		  <script type="text/javascript">
+		    var f23 = new LiveValidation('f23', {wait: 300});
+		    f23.add( Validate.Presence );
+				f23.add( Validate.Length, {minimum: 10} );
+		  </script>  
+		</p>
+	</div>
+
 </body>
 </html>
