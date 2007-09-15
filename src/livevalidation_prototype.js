@@ -53,7 +53,11 @@ LiveValidation.prototype = {
      *							onInvalid {Function} 	- function to execute when field fails validation
      *													  (DEFAULT: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); })
      *							insertAfterWhatNode {mixed} 	- reference or id of node to have the message inserted after 
-     *													  (DEFAULT: the field that is being validated)							
+     *													  (DEFAULT: the field that is being validated
+     *              onlyOnBlur {Boolean} - whether you want it to validate as you type or only on blur
+     *                            (DEFAULT: false)
+     *              wait {Integer} - the time you want it to pause from the last keystroke before it validates (ms)
+     *                            (DEFAULT: 0)							
      */
     initialize: function(element, optionsObj){
         // set up special properties (ones that need some extra processing or can be overidden from optionsObj)
@@ -64,22 +68,25 @@ LiveValidation.prototype = {
         this.validations = [];
         // overwrite the options defaults with passed in ones
         this.options = Object.extend({
-			validMessage: 'Thankyou!',
-			onValid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
-			onInvalid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
-            insertAfterWhatNode: this.element
-		}, optionsObj || {});
+						validMessage: 'Thankyou!',
+						onValid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
+						onInvalid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
+            insertAfterWhatNode: this.element,
+						onlyOnBlur: false,
+						wait: 0
+				}, optionsObj || {});
         this.options.insertAfterWhatNode = $(this.options.insertAfterWhatNode);
         Object.extend(this, this.options); // copy the options to the actual object
+        Event.observe(this.element, 'focus', this.doOnFocus.bindAsEventListener(this)); // this sets the focused flag
         if(this.elementType == LiveValidation.CHECKBOX){
             Event.observe(this.element, 'change', this.validate.bindAsEventListener(this));
-			Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
+						Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
         }else{
-            Event.observe(this.element, 'keyup', this.validate.bindAsEventListener(this));
+						if(!this.onlyOnBlur) Event.observe(this.element, 'keyup', this.deferValidation.bindAsEventListener(this));
             Event.observe(this.element, 'blur', this.validate.bindAsEventListener(this));
         }
     },
-
+		
     /**
      *	adds a validation to perform to a LiveValidation object
      *
@@ -92,6 +99,31 @@ LiveValidation.prototype = {
         return this;
     },
     
+		/**
+     * makes the validation wait the alotted time from the last keystroke 
+     */
+    deferValidation: function(e){
+      // possibly remove classnames, and message to avoid confusion while typing
+      //if(this.wait >= 300) this.removeMessageAndFieldClass();
+      if(this.timeout) clearTimeout(this.timeout);
+      if(this.wait > 0) this.timeout = setTimeout(this.validate.bind(this), this.wait);  
+    },
+    
+    /**
+     * sets the focused flag to false when field loses focus 
+     */
+    doOnBlur: function(e){
+      this.focused = false;
+      this.validate(e);
+    },
+    
+    /**
+     * sets the focused flag to true when field gains focus 
+     */
+    doOnFocus: function(e){
+      this.focused = true;
+    },
+		
     /**
      *	gets the type of element, to check whether it is compatible
      *
