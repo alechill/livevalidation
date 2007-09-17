@@ -167,11 +167,11 @@ LiveValidation.prototype = {
     	 	var validation = this.validations[i];
     		switch(validation.type){
     		   	case Validate.Presence:
-                case Validate.Confirmation:
-                case Validate.Acceptance:
+            case Validate.Confirmation:
+            case Validate.Acceptance:
     		   		this.displayMessageWhenEmpty = true;
     		   		this.validationFailed = !this.validateElement(validation.type, validation.params); 
-    				break;
+    				  break;
     		   	default:
     		   		this.validationFailed = !this.validateElement(validation.type, validation.params);
     		   		break;
@@ -190,13 +190,13 @@ LiveValidation.prototype = {
      * @return {Boolean} - whether the validation has passed or failed
      */
     validateElement: function(validationFunction, validationParamsObj){
-      	var value = this.element.value;
-      	if(validationFunction == Validate.Acceptance){
-    	    if(this.elementType != LiveValidation.CHECKBOX) throw new Error('LiveValidation::validateElement - Element to validate acceptance must be a checkbox!');
+      var value = (this.elementType == LiveValidation.SELECT) ? this.element.options[this.element.selectedIndex].value : this.element.value;     
+      if(validationFunction == Validate.Acceptance){
+    	  if(this.elementType != LiveValidation.CHECKBOX) throw new Error('LiveValidation::validateElement - Element to validate acceptance must be a checkbox!');
     		value = this.element.checked;
     	}
-        var isValid = true;
-      	try{    
+      var isValid = true;
+      try{    
     		validationFunction(value, validationParamsObj);
     	} catch(error) {
     	  	if(error instanceof Validate.Error){

@@ -671,7 +671,7 @@ function runTests(){
     testDeferValidation: function(){ with(this){
         lv = new LiveValidation('myText', {wait: 1500});
         lv.add(Validate.Presence);
-        lv.element.value = ''
+        lv.element.value = '';
         lv.deferValidation();
         assertEqual(undefined, lv.message, "Message should be undefined at this point, as wait time has not elapsed");
      }}

@@ -503,6 +503,9 @@ function runTests(){
         // test it is  a checkbox input
         lv = new LiveValidation('myCheckbox');
         assertEqual(LiveValidation.CHECKBOX, lv.getElementType('myCheckbox'));
+        // test it is  a select element
+        lv = new LiveValidation('mySelect');
+        assertEqual(LiveValidation.SELECT, lv.getElementType('mySelect'));
     }},
     
     testValidateElement: function(){ with(this){
@@ -618,33 +621,46 @@ function runTests(){
         lv3.add(Validate.Numericality);
         lv4 = new LiveValidation('myCheckbox');
         lv4.add(Validate.Acceptance);
-        var vs = [lv, lv2, lv3, lv4];
+        lv5 = new LiveValidation('mySelect');
+        lv5.add(Validate.Inclusion, {within: ['Hello world', 'Howdy']});
+        var vs = [lv, lv2, lv3, lv4, lv5];
         // test one by one that if all the others pass validation, and 1 should fail, that this causes the massValidate to return false
         lv.element.value = '';
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv has no value, and has presence validation");
         lv.element.value = 'alec';
         lv2.element.value = 'i am invalid';
         lv3.element.value  = '3';
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv2 has invalid value, and has format validation");
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
         lv3.element.value  = 'foo';
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv3 has non numeric value, and has numericality validation");
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
         lv4.element.checked = false;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv4 is not checked, and has acceptance validation");
+        lv.element.value = 'alec';
+        lv2.element.value = 'hello world';
+        lv3.element.value  = '3';
+        lv4.element.checked = true;
+        lv5.element.selectedIndex = 0;
+        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv5 has first option selected, which is not allowed by the inclusion validation");
         // test that it returns true when all fields are valid
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assert(LiveValidation.massValidate(vs), "Should return true because all fields are valid");
     }},
     
@@ -671,7 +687,7 @@ function runTests(){
     testDeferValidation: function(){ with(this){
         lv = new LiveValidation('myText', {wait: 1500});
         lv.add(Validate.Presence);
-        lv.element.value = ''
+        lv.element.value = '';
         lv.deferValidation();
         assertEqual(undefined, lv.message, "Message should be undefined at this point, as wait time has not elapsed");
      }}
