@@ -360,7 +360,7 @@ it will still be validated without having to leave the field.</p>
 			  
 		<h4>Select element</h4>
 		<p>This example will check that the value is not the same as any in your allowed values.</p>
-		<p>Should not be &ldquo;hello world&rdquo;: 
+		<p>Should be &ldquo;Hello world&rdquo;, or &ldquo;Howdy&rdquo;: 
 		  <select id="f24">
          <option>Please select...</option>
          <option>Hello world</option>
@@ -368,7 +368,7 @@ it will still be validated without having to leave the field.</p>
       </select>
 			<script type="text/javascript">
 		    var f24 = new LiveValidation('f24');
-		    f24.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ] } );
+		    f24.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
 		  </script>  
 	  </p>
   </div>
