@@ -5,6 +5,10 @@
  */
 // <![CDATA[
 
+// utility functions
+function stripSpaces(value){ return value.strip(); }
+
+// defines and runs all the tests
 function runTests(){
 	
 	
@@ -576,7 +580,7 @@ function runTests(){
         assertEqual('Thankyou!',$('myText').up().next().firstChild.nodeValue, "The span should contain a textnode with the default validMessage as its value in it");
         $('myText').up().next().up().removeChild($('myText').up().next());
         // test the classes added to the field in various valid states
-        var stripSpaces = function(value){ return value.strip(); }
+        //var stripSpaces = function(value){ return value.strip(); }
         //clear any class names added by previous tests
         $('myText').className = '';
         lv = new LiveValidation('myText');
@@ -642,7 +646,35 @@ function runTests(){
         lv3.element.value  = '3';
         lv4.element.checked = true;
         assert(LiveValidation.massValidate(vs), "Should return true because all fields are valid");
-    }}
+    }},
+    
+    testFocusedFlag: function(){ with(this){
+        lv.doOnFocus();
+        assertEqual(true, lv.focused);
+        lv.doOnBlur();
+        assertEqual(false, lv.focused);
+    }},
+    
+    testOnlyOnBlur: function(){ with(this){
+        lv = new LiveValidation('myText', {onlyOnBlur: true});
+        lv.add(Validate.Presence);
+        lv.doOnFocus();
+        lv.element.value = '';
+        lv.doOnBlur();
+        assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
+        lv.doOnFocus();
+        lv.element.value = 'hello world';
+        lv.doOnBlur();
+        assertEqual("Thankyou!", lv.message, "Message should be set to default valid message");
+    }},
+    
+    testDeferValidation: function(){ with(this){
+        lv = new LiveValidation('myText', {wait: 1500});
+        lv.add(Validate.Presence);
+        lv.element.value = ''
+        lv.deferValidation();
+        assertEqual(undefined, lv.message, "Message should be undefined at this point, as wait time has not elapsed");
+     }}
 
   }, "testlog");
 

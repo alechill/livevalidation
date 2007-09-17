@@ -26,6 +26,7 @@ LiveValidation.TEXTAREA 		= 1;
 LiveValidation.TEXT 			    = 2;
 LiveValidation.PASSWORD 		= 3;
 LiveValidation.CHECKBOX 		= 4;
+LiveValidation.SELECT = 5;
 
 /*************************************** Static methods *********************************************/
 
@@ -73,13 +74,17 @@ LiveValidation.prototype.initialize = function(element, optionsObj){
   this.displayMessageWhenEmpty = false;
   this.validationFailed = false;
 	this.element.onfocus = function(e){ self.doOnFocus(); }
-  if(this.elementType == LiveValidation.CHECKBOX){
-	  this.element.onchange = function(e){ self.validate(); }
-		this.element.onclick = function(e){ self.validate(); }
-	}else{
-	  if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); }
-	  this.element.onblur = function(e){ self.doOnBlur(); }
-	}
+  switch(this.elementType){
+    case LiveValidation.CHECKBOX:
+      this.element.onclick = function(e){ self.validate(); }
+    // let it run into the next to add a change event too
+    case LiveValidation.SELECT:
+      this.element.onchange = function(e){ self.validate(); }
+      break;
+    default:
+      if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); }
+	    this.element.onblur = function(e){ self.doOnBlur(); }
+  }
 }
 
 /**
@@ -127,20 +132,22 @@ LiveValidation.prototype.doOnFocus = function(e){
  *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
  */
 LiveValidation.prototype.getElementType = function(){
-	switch(true){
-	  	case (this.element.nodeName == 'TEXTAREA'):
-	  		return LiveValidation.TEXTAREA;
-	  	case (this.element.nodeName == 'INPUT' && this.element.type == 'text'):
-	  		return LiveValidation.TEXT;
-	  	case (this.element.nodeName == 'INPUT' && this.element.type == 'password'):
-	  		return LiveValidation.PASSWORD;
-	  	case (this.element.nodeName == 'INPUT' && this.element.type == 'checkbox'):
-	  		return LiveValidation.CHECKBOX;
-	  	case (this.element.nodeName == 'INPUT'):
-    	  	throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on a ' + this.element.type + ' input!');
-	  	default:
-	  		throw new Error('LiveValidation::getElementType - Element must be an input or textarea!');
-	}
+  switch(true){
+    case (this.element.nodeName == 'TEXTAREA'):
+      return LiveValidation.TEXTAREA;
+    case (this.element.nodeName == 'INPUT' && this.element.type == 'text'):
+    	return LiveValidation.TEXT;
+    case (this.element.nodeName == 'INPUT' && this.element.type == 'password'):
+    	return LiveValidation.PASSWORD;
+    case (this.element.nodeName == 'INPUT' && this.element.type == 'checkbox'):
+    	return LiveValidation.CHECKBOX;
+    case (this.element.nodeName == 'SELECT'):
+      return LiveValidation.SELECT;
+    case (this.element.nodeName == 'INPUT'):
+    	throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + this.element.type + ' input!');
+    default:
+    	throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea!');
+  }
 }
 
 /**

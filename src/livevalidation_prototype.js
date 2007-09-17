@@ -5,10 +5,11 @@ var LiveValidation = Class.create();
 Object.extend(LiveValidation, {
     
     /** element types constants *******/
-    TEXTAREA:  1,
-    TEXT:      2,
+    TEXTAREA:   1,
+    TEXT:          2,
     PASSWORD : 3,
-    CHECKBOX:  4,
+    CHECKBOX:   4,
+    SELECT:       5,
 
     /** static methods **************/
 
@@ -19,7 +20,7 @@ Object.extend(LiveValidation, {
      *	@return {Bool} - true if all passed validation, false if any fail						
      */
     massValidate: function(validations){
-      	var returnValue = true;
+      var returnValue = true;
     	for(var i = 0, len = validations.length; i < len; ++i ){
     		var valid = validations[i].validate();
     		if(returnValue) returnValue = valid;
@@ -78,13 +79,17 @@ LiveValidation.prototype = {
         this.options.insertAfterWhatNode = $(this.options.insertAfterWhatNode);
         Object.extend(this, this.options); // copy the options to the actual object
         Event.observe(this.element, 'focus', this.doOnFocus.bindAsEventListener(this)); // this sets the focused flag
-        if(this.elementType == LiveValidation.CHECKBOX){
-            Event.observe(this.element, 'change', this.validate.bindAsEventListener(this));
-						Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
-        }else{
-						if(!this.onlyOnBlur) Event.observe(this.element, 'keyup', this.deferValidation.bindAsEventListener(this));
-            Event.observe(this.element, 'blur', this.validate.bindAsEventListener(this));
-        }
+       switch(this.elementType){
+         case LiveValidation.CHECKBOX:
+           Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
+           // let it run into the next to add a change event too
+         case LiveValidation.SELECT:
+           Event.observe(this.element, 'change', this.validate.bindAsEventListener(this));
+           break;
+         default:
+           if(!this.onlyOnBlur) Event.observe(this.element, 'keyup', this.deferValidation.bindAsEventListener(this));
+           Event.observe(this.element, 'blur', this.validate.bindAsEventListener(this));
+       }
     },
 		
     /**
@@ -140,10 +145,12 @@ LiveValidation.prototype = {
     	  		return LiveValidation.PASSWORD;
     	  	case (this.element.nodeName == 'INPUT' && this.element.type == 'checkbox'):
     	  		return LiveValidation.CHECKBOX;
-            case (this.element.nodeName == 'INPUT'):
+          case (this.element.nodeName == 'SELECT'):
+            return LiveValidation.SELECT;
+          case (this.element.nodeName == 'INPUT'):
     	  		throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + this.element.type + ' input!');
     	  	default:
-    	  		throw new Error('LiveValidation::getElementType - Element must be an input or textarea!');
+    	  		throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea!');
     	}
     },
     
