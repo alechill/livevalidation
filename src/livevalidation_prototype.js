@@ -38,7 +38,6 @@ LiveValidation.prototype = {
     messageClass: 'LV_validation_message',
     validFieldClass: 'LV_valid_field',
     invalidFieldClass: 'LV_invalid_field',
-    displayMessageWhenEmpty: false,
     
     /**
      *	constructor for LiveValidation - validates a form field in real-time based on validations you assign to it
@@ -61,35 +60,37 @@ LiveValidation.prototype = {
      *                            (DEFAULT: 0)		
      */
     initialize: function(element, optionsObj){
-        // set up special properties (ones that need some extra processing or can be overidden from optionsObj)
-      	if(!element) throw new Error("LiveValidation::initialize - No element reference or element id has been provided!");
+      // set up special properties (ones that need some extra processing or can be overidden from optionsObj)
+      if(!element) throw new Error("LiveValidation::initialize - No element reference or element id has been provided!");
     	this.element = $(element);
     	if(!this.element) throw new Error("LiveValidation::initialize - No element with reference or id of '" + element + "' exists!");
-        this.elementType = this.getElementType();
-        this.validations = [];
-        // overwrite the options defaults with passed in ones
-        this.options = Object.extend({
-						validMessage: 'Thankyou!',
-						onValid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
-						onInvalid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
-            insertAfterWhatNode: this.element,
-						onlyOnBlur: false,
-						wait: 0
-				}, optionsObj || {});
-        this.options.insertAfterWhatNode = $(this.options.insertAfterWhatNode);
-        Object.extend(this, this.options); // copy the options to the actual object
-        Event.observe(this.element, 'focus', this.doOnFocus.bindAsEventListener(this)); // this sets the focused flag
-       switch(this.elementType){
-         case LiveValidation.CHECKBOX:
-           Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
-           // let it run into the next to add a change event too
-         case LiveValidation.SELECT:
-           Event.observe(this.element, 'change', this.validate.bindAsEventListener(this));
-           break;
-         default:
-           if(!this.onlyOnBlur) Event.observe(this.element, 'keyup', this.deferValidation.bindAsEventListener(this));
-           Event.observe(this.element, 'blur', this.validate.bindAsEventListener(this));
-       }
+      // properties that could not be initialised above
+      this.elementType = this.getElementType();
+      this.validations = [];
+      // overwrite the options defaults with passed in ones
+      this.options = Object.extend({
+				validMessage: 'Thankyou!',
+				onValid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
+				onInvalid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
+        insertAfterWhatNode: this.element,
+				onlyOnBlur: false,
+				wait: 0
+			}, optionsObj || {});
+      this.options.insertAfterWhatNode = $(this.options.insertAfterWhatNode);
+      Object.extend(this, this.options); // copy the options to the actual object
+      // events
+      Event.observe(this.element, 'focus', this.doOnFocus.bindAsEventListener(this)); // this sets the focused flag
+      switch(this.elementType){
+        case LiveValidation.CHECKBOX:
+          Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
+          // let it run into the next to add a change event too
+        case LiveValidation.SELECT:
+          Event.observe(this.element, 'change', this.validate.bindAsEventListener(this));
+          break;
+        default:
+          if(!this.onlyOnBlur) Event.observe(this.element, 'keyup', this.deferValidation.bindAsEventListener(this));
+          Event.observe(this.element, 'blur', this.validate.bindAsEventListener(this));
+      }
     },
 		
     /**
