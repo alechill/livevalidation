@@ -286,14 +286,10 @@ LiveValidation.prototype.insertMessage = function(elementToInsert){
 LiveValidation.prototype.addFieldClass = function(){
     this.removeFieldClass();
     if(!this.validationFailed){
-        //if(this.element.className.indexOf(this.invalidFieldClass) != -1) this.element.className = this.element.className.split(this.invalidFieldClass).join('');
-        if(!this.displayMessageWhenEmpty && this.element.value == ''){
-           if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join('');
-        }else{
+        if(this.displayMessageWhenEmpty || this.element.value != ''){
             if(this.element.className.indexOf(this.validFieldClass) == -1) this.element.className += ' ' + this.validFieldClass;
         }
     }else{
-        //if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join(' ');
         if(this.element.className.indexOf(this.invalidFieldClass) == -1) this.element.className += ' ' + this.invalidFieldClass;
     }
 }

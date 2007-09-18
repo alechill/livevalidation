@@ -272,9 +272,7 @@ LiveValidation.prototype = {
     addFieldClass: function(){
         this.removeFieldClass();
         if(!this.validationFailed){
-            if(!this.displayMessageWhenEmpty && this.element.value == ''){
-                this.element.removeClassName(this.validFieldClass);
-            }else{
+            if(this.displayMessageWhenEmpty || this.element.value != ''){
                 if(!this.element.hasClassName(this.validFieldClass)) this.element.addClassName(this.validFieldClass);
             }
         }else{
