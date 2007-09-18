@@ -58,7 +58,7 @@ LiveValidation.prototype = {
      *              onlyOnBlur {Boolean} - whether you want it to validate as you type or only on blur
      *                            (DEFAULT: false)
      *              wait {Integer} - the time you want it to pause from the last keystroke before it validates (ms)
-     *                            (DEFAULT: 0)							
+     *                            (DEFAULT: 0)		
      */
     initialize: function(element, optionsObj){
         // set up special properties (ones that need some extra processing or can be overidden from optionsObj)
@@ -108,8 +108,7 @@ LiveValidation.prototype = {
      * makes the validation wait the alotted time from the last keystroke 
      */
     deferValidation: function(e){
-      // possibly remove classnames, and message to avoid confusion while typing
-      //if(this.wait >= 300) this.removeMessageAndFieldClass();
+      if(this.wait >= 300) this.removeMessageAndFieldClass();
       if(this.timeout) clearTimeout(this.timeout);
       this.timeout = setTimeout(this.validate.bind(this), this.wait);
     },
@@ -127,6 +126,7 @@ LiveValidation.prototype = {
      */
     doOnFocus: function(e){
       this.focused = true;
+      this.removeMessageAndFieldClass();
     },
 		
     /**
@@ -236,7 +236,6 @@ LiveValidation.prototype = {
      * want to keep some of the functionality
      */
    
-    
     /**
      *	makes a span containg the passed or failed message
      *
@@ -255,7 +254,7 @@ LiveValidation.prototype = {
      * @var elementToIsert {HTMLElementObject} - an element node to insert
      */
     insertMessage: function(elementToInsert){
-        if( nxtEl = this.insertAfterWhatNode.next('.' + this.messageClass) ) nxtEl.remove();
+        this.removeMessage();
         var className = this.validationFailed ? this.invalidClass : this.validClass;
       	if( (this.displayMessageWhenEmpty && (this.elementType == LiveValidation.CHECKBOX || this.element.value == '')) || this.element.value != '' ){
     	  	$(elementToInsert).addClassName( this.messageClass + (' ' + className) );
@@ -271,18 +270,41 @@ LiveValidation.prototype = {
      *	changes the class of the field based on whether it is valid or not
      */
     addFieldClass: function(){
+        this.removeFieldClass();
         if(!this.validationFailed){
-            this.element.removeClassName(this.invalidFieldClass);
             if(!this.displayMessageWhenEmpty && this.element.value == ''){
                 this.element.removeClassName(this.validFieldClass);
             }else{
                 if(!this.element.hasClassName(this.validFieldClass)) this.element.addClassName(this.validFieldClass);
             }
         }else{
-            this.element.removeClassName(this.validFieldClass);
             if(!this.element.hasClassName(this.invalidFieldClass)) this.element.addClassName(this.invalidFieldClass);
         }
+    },
+    
+    /**
+     *	removes the message element if it exists
+     */
+    removeMessage: function(){
+      if( nxtEl = this.insertAfterWhatNode.next('.' + this.messageClass) ) nxtEl.remove();
+    },
+    
+    /**
+     *	removes the class that has been applied to the field to indicte if valid or not
+     */
+    removeFieldClass: function(){
+      this.element.removeClassName(this.invalidFieldClass);
+      this.element.removeClassName(this.validFieldClass);
+    },
+    
+    /**
+     *	removes the message and the field class
+     */
+    removeMessageAndFieldClass: function(){
+      this.removeMessage();
+      this.removeFieldClass();
     }
+ 
     
 } // end of LiveValidation.prototype object
 /*************************************** Validate class ****************************************/

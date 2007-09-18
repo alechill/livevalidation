@@ -671,6 +671,16 @@ function runTests(){
         assertEqual(false, lv.focused);
     }},
     
+    testRemovesMessageAndFieldClassOnFocus: function(){ with(this){
+        lv.add(Validate.Presence);
+        lv.element.value = '';
+        lv.validate();
+        assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
+        lv.doOnFocus();
+        assertEqual('', stripSpaces($(lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
+        assertEqual(undefined, $(lv.element).next(), "There should now be no span element after the field, as it should have been removed");
+    }},
+    
     testOnlyOnBlur: function(){ with(this){
         lv = new LiveValidation('myText', {onlyOnBlur: true});
         lv.add(Validate.Presence);
