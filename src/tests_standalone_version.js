@@ -503,6 +503,9 @@ function runTests(){
         // test it is  a checkbox input
         lv = new LiveValidation('myCheckbox');
         assertEqual(LiveValidation.CHECKBOX, lv.getElementType('myCheckbox'));
+        // test it is  a select element
+        lv = new LiveValidation('mySelect');
+        assertEqual(LiveValidation.SELECT, lv.getElementType('mySelect'));
     }},
     
     testValidateElement: function(){ with(this){
