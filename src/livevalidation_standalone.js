@@ -103,8 +103,7 @@ LiveValidation.prototype.add = function(validationFunction, validationParamsObj)
  * makes the validation wait the alotted time from the last keystroke 
  */
 LiveValidation.prototype.deferValidation = function(e){
-  // possibly remove classnames, and message to avoid confusion while typing
-  //if(this.wait >= 300) this.removeMessageAndFieldClass();
+  if(this.wait >= 300) this.removeMessageAndFieldClass();
 	var self = this;
   if(this.timeout) clearTimeout(self.timeout);
   this.timeout = setTimeout( function(){ self.validate() }, self.wait); 
@@ -123,6 +122,7 @@ LiveValidation.prototype.doOnBlur = function(e){
  */
 LiveValidation.prototype.doOnFocus = function(e){
   this.focused = true;
+  this.removeMessageAndFieldClass()
 }
 
 /**
@@ -247,7 +247,7 @@ LiveValidation.prototype.createMessageSpan = function(){
 /**
  *	removes the message element if it exists, so that the new message will replace it
  */
-LiveValidation.prototype.removeMessageIfExists = function(){
+LiveValidation.prototype.removeMessage = function(){
 	var nextEl;
 	var el = this.insertAfterWhatNode;
 	while(el.nextSibling){
@@ -266,7 +266,7 @@ LiveValidation.prototype.removeMessageIfExists = function(){
  * @var elementToIsert {HTMLElementObject} - an element node to insert
  */
 LiveValidation.prototype.insertMessage = function(elementToInsert){
-  	this.removeMessageIfExists();
+  	this.removeMessage();
   	if( (this.displayMessageWhenEmpty && (this.elementType == LiveValidation.CHECKBOX || this.element.value == ''))
 	  || this.element.value != '' ){
         var className = this.validationFailed ? this.invalidClass : this.validClass;
@@ -284,17 +284,34 @@ LiveValidation.prototype.insertMessage = function(elementToInsert){
  *	changes the class of the field based on whether it is valid or not
  */
 LiveValidation.prototype.addFieldClass = function(){
+    this.removeFieldClass();
     if(!this.validationFailed){
-        if(this.element.className.indexOf(this.invalidFieldClass) != -1) this.element.className = this.element.className.split(this.invalidFieldClass).join('');
+        //if(this.element.className.indexOf(this.invalidFieldClass) != -1) this.element.className = this.element.className.split(this.invalidFieldClass).join('');
         if(!this.displayMessageWhenEmpty && this.element.value == ''){
            if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join('');
         }else{
             if(this.element.className.indexOf(this.validFieldClass) == -1) this.element.className += ' ' + this.validFieldClass;
         }
     }else{
-        if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join(' ');
+        //if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join(' ');
         if(this.element.className.indexOf(this.invalidFieldClass) == -1) this.element.className += ' ' + this.invalidFieldClass;
     }
+}
+    
+/**
+ *	removes the class that has been applied to the field to indicte if valid or not
+ */
+LiveValidation.prototype.removeFieldClass = function(){
+  if(this.element.className.indexOf(this.invalidFieldClass) != -1) this.element.className = this.element.className.split(this.invalidFieldClass).join('');
+  if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join(' ');
+}
+    
+/**
+ *	removes the message and the field class
+ */
+LiveValidation.prototype.removeMessageAndFieldClass = function(){
+  this.removeMessage();
+  this.removeFieldClass();
 }
 
 /*************************************** Validate class ****************************************/

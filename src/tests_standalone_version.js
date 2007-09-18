@@ -650,7 +650,7 @@ function runTests(){
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
         lv4.element.checked = true;
-        lv5.element.selectedIndex = 1;
+        lv5.element.selectedIndex = 0;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv5 has first option selected, which is not allowed by the inclusion validation");
         // test that it returns true when all fields are valid
         lv.element.value = 'alec';
@@ -666,6 +666,16 @@ function runTests(){
         assertEqual(true, lv.focused);
         lv.doOnBlur();
         assertEqual(false, lv.focused);
+    }},
+    
+    testRemovesMessageAndFieldClassOnFocus: function(){ with(this){
+        lv.add(Validate.Presence);
+        lv.element.value = '';
+        lv.validate();
+        assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
+        lv.doOnFocus();
+        assertEqual('', stripSpaces($(lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
+        assertEqual(undefined, $(lv.element).next(), "There should now be no span element after the field, as it should have been removed");
     }},
     
     testOnlyOnBlur: function(){ with(this){
