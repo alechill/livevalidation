@@ -1,4 +1,6 @@
-// Copyright (c) 2007 Alec Hill (www.livevalidation.com) - LiveValidation is licensed under the terms of the MIT License
+// LiveValidation 1.1 (standalone version)
+// Copyright (c) 2007 Alec Hill (www.livevalidation.com)
+// LiveValidation is licensed under the terms of the MIT License
 
 /**
  *	validates a form field in real-time based on validations you assign to it

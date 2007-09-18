@@ -1,8 +1,9 @@
 /**
  * @author alec.hill
  * 
- * tests for LiveValidation (standalone version)
+ * tests for LiveValidation 1.1 (standalone version)
  */
+
 // <![CDATA[
 
 // utility functions
@@ -706,4 +707,5 @@ function runTests(){
 
 
 } // end function
+
 // ]]>

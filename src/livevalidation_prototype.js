@@ -1,4 +1,6 @@
-// Copyright (c) 2007 Alec Hill (www.livevalidation.com) - LiveValidation is licensed under the terms of the MIT License
+// LiveValidation 1.1 (prototype.js version)
+// Copyright (c) 2007 Alec Hill (www.livevalidation.com)
+// LiveValidation is licensed under the terms of the MIT License
 
 var LiveValidation = Class.create();
 
