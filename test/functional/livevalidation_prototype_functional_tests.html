@@ -356,19 +356,55 @@ it will still be validated without having to leave the field.</p>
   
   <div class="section" id="exampleElements">
 	  <h3>Element types</h3>
-		<p>LiveValidation can be used with various input elements (text, password, checkbox), textarea elements, and select elements.</p>
-			  
+		<p>LiveValidation can be used with various input elements (text, password, checkbox), textarea elements, and select elements.</p>    
+    <h4>Text input element</h4>
+		<p>This example will check that the value is filled in.</p>
+		<p>Must be filled in: 
+		  <input id="f24" type="text" value="" />
+			<script type="text/javascript">
+		    var f24 = new LiveValidation('f24');
+		    f24.add(Validate.Presence);
+		  </script>  
+	  </p>
+    <h4>Password input element</h4>
+		<p>This example will check that the value is the same as the previous text field.</p>
+		<p>Must be same as the previous text field&rsquo;s value: 
+		  <input id="f25" type="password" value="" />
+			<script type="text/javascript">
+		    var f25 = new LiveValidation('f25');
+		    f25.add(Validate.Confirmation, { match: 'f24' } );
+		  </script>  
+	  </p>
+    <h4>Checkbox input element</h4>
+		<p>This example will check that the checkbox is checked.</p>
+		<p>Accept by checking the box: 
+		  <input id="f26" type="checkbox" class="checkbox" />
+			<script type="text/javascript">
+		    var f26 = new LiveValidation('f26');
+		    f26.add(Validate.Acceptance);
+		  </script>  
+	  </p>
+    <h4>Textarea element</h4>
+		<p>This example will check that the value is filled in.</p>
+		<p>Must be filled in: 
+      <br/>
+		  <textarea id="f27" rows="3" cols="10" class="shallow"></textarea>
+			<script type="text/javascript">
+		    var f27 = new LiveValidation('f27');
+		    f27.add(Validate.Presence);
+		  </script>  
+	  </p>
 		<h4>Select element</h4>
 		<p>This example will check that the value is not the same as any in your allowed values.</p>
 		<p>Should be &ldquo;Hello world&rdquo;, or &ldquo;Howdy&rdquo;: 
-		  <select id="f24">
+		  <select id="f28">
          <option>Please select...</option>
          <option>Hello world</option>
          <option>Howdy</option>
       </select>
 			<script type="text/javascript">
-		    var f24 = new LiveValidation('f24');
-		    f24.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
+		    var f28 = new LiveValidation('f28');
+		    f28.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
 		  </script>  
 	  </p>
   </div>
