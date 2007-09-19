@@ -9,11 +9,11 @@ var LiveValidation = Class.create();
 Object.extend(LiveValidation, {
     
   /** element types constants *******/
-  TEXTAREA:   1,
-  TEXT:          2,
-  PASSWORD : 3,
-  CHECKBOX:   4,
-  SELECT:       5,
+  TEXTAREA:  1,
+  TEXT:         2,
+  PASSWORD: 3,
+  CHECKBOX:  4,
+  SELECT:      5,
 
   /**
    *	pass an array of LiveValidation objects and it will validate all of them
