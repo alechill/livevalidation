@@ -2,18 +2,15 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>LiveValidation functional tests (prototype version)</title>
+  <title>LiveValidation functional tests (compressed standalone version)</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   
   <link rel="stylesheet" href="../css/standard.css" type="text/css" />
   <link rel="stylesheet" href="../css/test.css" type="text/css" />
   <link rel="stylesheet" href="../css/validation.css" type="text/css" />
   
-  <!-- required from lib -->
-  <script type="text/javascript" src="../../lib/prototype.js" ></script>
-  
   <!--  the LiveValidation source to be tested -->
-  <script type="text/javascript" src="../../src/livevalidation_prototype.js"></script>
+  <script type="text/javascript" src="../../src/livevalidation_standalone.compressed.js"></script>
   
   <style type="text/css">
     .section h3 { background-color:#cccccc; padding:3px; }
@@ -23,9 +20,9 @@
 </head>
 <body>
   
-  <h1>LiveValidation functional tests (prototype version)</h1>
+  <h1>LiveValidation functional tests (compressed standalone version)</h1>
   
-  <p>Functional tests for Validate and LiveValidation classes (prototype version)</p>
+  <p>Functional tests for Validate and LiveValidation classes (compressed standalone version)</p>
 
   <div class="section" id="examplePresence">
 	   <h3>Presence</h3>
@@ -327,10 +324,10 @@ will still be valid, as it will be treated as an optional field.</p>
 						                                }
 	  </script> 
   </div>
-	
+
 	<div class="section" id="exampleOptions">
 		<h3>LiveValidation options</h3>
-		<p>There are various options that can be overridden when instatiating a LiveValidation object.</p>
+		<p>There are various options that can be overriden when instatiating a LiveValidation object.</p>
 		<h4>onlyOnBlur</h4>
 		<p>Setting onlyOnBlur to be true will mean the validation will only be run when the field loses focus.</p>
 		<p>Must be filled in:
