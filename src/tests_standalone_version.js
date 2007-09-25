@@ -1,15 +1,24 @@
 /**
  * @author alec.hill
  * 
- * tests for LiveValidation 1.1 (standalone version)
+ * tests for LiveValidation 1.2 (standalone version)
  */
 
 // <![CDATA[
 
-// utility functions
+// utility functions /////////////////////////////////////
+
+// strip spaces from the beginning and end of a value
 function stripSpaces(value){ return value.strip(); }
 
-// defines and runs all the tests
+// simulate events
+Event.simulateEvent = function(element, eventName) {
+  var oEvent = document.createEvent("Events");
+  oEvent.initEvent(eventName, true, true, document.defaultView);
+  $(element).dispatchEvent(oEvent);
+};
+
+// defines and runs all the tests ///////////////////////////
 function runTests(){
 	
 	
@@ -21,6 +30,7 @@ function runTests(){
     
     teardown: function() { with(this) {
         lv = null;
+        window['LiveValidationForm_myForm'] = null;
         Event.unloadCache(); // remove events so they dont encroach on the next test
     }},
     
@@ -414,6 +424,7 @@ function runTests(){
             }else{
                 throw error;
             }
+
         }
     }},
     
@@ -468,8 +479,8 @@ function runTests(){
         //test overiding the defaults
         lv = new LiveValidation('myText', {validMessage: 'Ta!', 
                                                                 insertAfterWhatNode: $('myText').parentNode, 
-                                                                onValid: function(){ alert('i am valid'); },
-                                                                onInvalid: function(){ alert('i am not valid'); }
+                                                                onValid: function(){ /*alert('i am valid');*/ },
+                                                                onInvalid: function(){ /*alert('i am not valid');*/ }
                                                                 });
         assertEqual('Ta!', lv.validMessage);
         assertEqual($('myText').parentNode, lv.insertAfterWhatNode, "Expecting the node to insert the message to have been overidden to be lv.element.parentNode");
@@ -607,7 +618,7 @@ function runTests(){
         //test that the class of the field is valid and not duplicated
         lv.element.value = '20';
         lv.validate();
-        assertEqual(lv.validFieldClass,stripSpaces( $(lv.element).className), "The className of the field should be the default validFieldClass, but may have been duplicated");
+        assertEqual(lv.validFieldClass, stripSpaces($(lv.element).className), "The className of the field should be the default validFieldClass, but may have been duplicated");
         //test that the class of the field gets set back to empty if the validation type does not require to show valid state when empty
         lv.element.value = '';
         lv.validate();
@@ -629,26 +640,26 @@ function runTests(){
         lv.element.value = '';
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
-        lv5.element.selectedIndex = 1;
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv has no value, and has presence validation");
         lv.element.value = 'alec';
         lv2.element.value = 'i am invalid';
         lv3.element.value  = '3';
-        lv5.element.selectedIndex = 1;
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv2 has invalid value, and has format validation");
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
         lv3.element.value  = 'foo';
-        lv5.element.selectedIndex = 1;
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv3 has non numeric value, and has numericality validation");
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
-        lv5.element.selectedIndex = 1;
         lv4.element.checked = false;
+        lv5.element.selectedIndex = 1;
         assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv4 is not checked, and has acceptance validation");
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
@@ -660,8 +671,8 @@ function runTests(){
         lv.element.value = 'alec';
         lv2.element.value = 'hello world';
         lv3.element.value  = '3';
-        lv5.element.selectedIndex = 1;
         lv4.element.checked = true;
+        lv5.element.selectedIndex = 1;
         assert(LiveValidation.massValidate(vs), "Should return true because all fields are valid");
     }},
     
@@ -677,7 +688,7 @@ function runTests(){
         lv.element.value = '';
         lv.validate();
         assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
-        lv.doOnFocus();
+        Event.simulateEvent(lv.element, 'focus');
         assertEqual('', stripSpaces($(lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
         assertEqual(undefined, $(lv.element).next(), "There should now be no span element after the field, as it should have been removed");
     }},
@@ -685,13 +696,13 @@ function runTests(){
     testOnlyOnBlur: function(){ with(this){
         lv = new LiveValidation('myText', {onlyOnBlur: true});
         lv.add(Validate.Presence);
-        lv.doOnFocus();
+        Event.simulateEvent(lv.element, 'focus');
         lv.element.value = '';
-        lv.doOnBlur();
+        Event.simulateEvent(lv.element, 'blur');
         assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
-        lv.doOnFocus();
+        Event.simulateEvent(lv.element, 'focus');
         lv.element.value = 'hello world';
-        lv.doOnBlur();
+        Event.simulateEvent(lv.element, 'blur');
         assertEqual("Thankyou!", lv.message, "Message should be set to default valid message");
     }},
     
@@ -701,6 +712,22 @@ function runTests(){
         lv.element.value = '';
         lv.deferValidation();
         assertEqual(undefined, lv.message, "Message should be undefined at this point, as wait time has not elapsed");
+        clearTimeout(lv.timeout);
+     }},
+     
+     testOnlyOnSubmit: function(){ with(this){
+         lv = new LiveValidation('myText', {onlyOnSubmit: true});
+         lv.add(Validate.Presence);
+         Event.simulateEvent(lv.element, 'focus');
+         lv.element.value = '';
+         Event.simulateEvent(lv.element, 'blur');
+         assertEqual(undefined, lv.message, "Message should be undefined at this point, as it should only be set when form is submitted");
+         Event.simulateEvent(lv.form, 'submit');
+         assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message now that the form has submitted");
+     }},
+     
+     testLiveValidationFormIsInstantiated: function(){ with(this){
+       assertNotNull(window['LiveValidationForm_myForm'], "window['LiveValidationForm_myForm'] should have been created by the first LiveValidation object");
      }}
 
   }, "testlog");

@@ -290,18 +290,14 @@ then checks that it is an email address, and then makes sure it is between 10 an
 
   <div class="section" id="exampleForms">
 		<h3>Validating entire forms</h3>
-		<p>To validate an entire form we use the LiveValidation.massValidate static function. First set up fields that you want validating 
-to be LiveValidation objects, as we have been doing above. Then to validate them as a whole, simply call LiveValidation.massValidate passing it an array 
-containing references to these objects. This will return true if all the fields were valid, and false if any fail, but if one fails it will remember this and 
-carry on doing all the validations, so that the appropriate messages are shown for each field, so your user can easily see on the form which fields
- were invalid.</p>
- 		<p>This however is not all that useful on its own, as the form will still continue submitting unless we intercept it. This is done by returning the
-whether massValidation failed or passed, from the onsubmit event of the form.</p>
-		<p>As an example, here a form will be wired up in this way, but as we dont actually have anywhere to submit the form to, we will stop the form
-from submitting, and then instead we will alert out whether the form is valid or not. <strong>NB this is for demonstration only, and should not be copied for your production 
-forms, as this form will not submit even if valid (unless of course javascript is turned off - one of the resons that server-side validation should always be performed as well)</strong>. Note that the email field has no validation that it is present, therefore if this is not filled in, the form
+    <p>When a LiveValidation object is instanciated, if it finds it is a child of a form, it will automatically attach itself to the submit event of the form, 
+so when it is submitted, validation on all the LiveValidation objects inside it will be performed automatically. If any of the validations fail it will stop the 
+form submitting.</p>
+    <p>You can also specify the onlyOnSubmit option to be true when you create the LiveValidation object to make it only validate when the form is 
+submitted. This is demonstrated in the following example.</p>
+		<p>Note also that the email field has no validation that it is present, therefore if this is not filled in the form
 will still be valid, as it will be treated as an optional field.</p>
-		<form action="#" method="post" id="myForm">
+		<form action="#" method="post">
 			<fieldset>
 			  <legend>Example of form validation</legend>
 				<p><label for="field1">Email:</label><br /><input type="text" id="field1" /></p>
@@ -311,20 +307,12 @@ will still be valid, as it will be treated as an optional field.</p>
 		  </fieldset>
 		</form>
     <script type="text/javascript">
-		  // create some LiveValidation fields
-			var field1 = new LiveValidation( 'field1' );
+			var field1 = new LiveValidation( 'field1', {onlyOnSubmit: true } );
 			field1.add( Validate.Email );
-			var field2 = new LiveValidation( 'field2' );
+			var field2 = new LiveValidation( 'field2', {onlyOnSubmit: true } );
 			field2.add( Validate.Acceptance );
-			var field3 = new LiveValidation( 'field3' );
+			var field3 = new LiveValidation( 'field3', {onlyOnSubmit: true } );
 			field3.add( Validate.Presence );
-			// get the form
-			var form = document.getElementById( 'myForm' );
-			// make it validate the form on its onsubmit event, and return whether
-			form.onsubmit = function(e){
-						                                  alert('Is everything valid? ' + LiveValidation.massValidate( [ field1, field2, field3 ] ) );  
-															                return false;
-						                                }
 	  </script> 
   </div>
 	
@@ -352,6 +340,20 @@ it will still be validated without having to leave the field.</p>
 				f23.add( Validate.Length, {minimum: 10} );
 		  </script>  
 		</p>
+    <h4>onlyOnSubmit</h4>
+    <p>Setting onlyOnSubmit to be true will cause validation to be run on a field, only when the form it belongs to is submitted.</p>
+    <form action="#" method="post">
+			<fieldset>
+			  <legend>Example of onlyOnSubmit option</legend>
+				<p><label for="f24">Must be at least 10 characters long:</label><br /><input type="text" id="f24" /></p>
+		    <p><input type="submit" class="submit" value="Test me!" /></p>
+		  </fieldset>
+		</form>
+    <script type="text/javascript">
+			var f24 = new LiveValidation( 'f24', {onlyOnSubmit: true } );
+      f24.add( Validate.Presence );
+			f24.add( Validate.Length, {minimum: 10} );
+	  </script> 
 	</div>
   
   <div class="section" id="exampleElements">
@@ -360,51 +362,51 @@ it will still be validated without having to leave the field.</p>
     <h4>Text input element</h4>
 		<p>This example will check that the value is filled in.</p>
 		<p>Must be filled in: 
-		  <input id="f24" type="text" value="" />
+		  <input id="f25" type="text" value="" />
 			<script type="text/javascript">
-		    var f24 = new LiveValidation('f24');
-		    f24.add(Validate.Presence);
+		    var f25 = new LiveValidation('f25');
+		    f25.add(Validate.Presence);
 		  </script>  
 	  </p>
     <h4>Password input element</h4>
 		<p>This example will check that the value is the same as the previous text field.</p>
 		<p>Must be same as the previous text field&rsquo;s value: 
-		  <input id="f25" type="password" value="" />
+		  <input id="f26" type="password" value="" />
 			<script type="text/javascript">
-		    var f25 = new LiveValidation('f25');
-		    f25.add(Validate.Confirmation, { match: 'f24' } );
+		    var f26 = new LiveValidation('f26');
+		    f26.add(Validate.Confirmation, { match: 'f26' } );
 		  </script>  
 	  </p>
     <h4>Checkbox input element</h4>
 		<p>This example will check that the checkbox is checked.</p>
 		<p>Accept by checking the box: 
-		  <input id="f26" type="checkbox" class="checkbox" />
+		  <input id="f27" type="checkbox" class="checkbox" />
 			<script type="text/javascript">
-		    var f26 = new LiveValidation('f26');
-		    f26.add(Validate.Acceptance);
+		    var f27 = new LiveValidation('f27');
+		    f27.add(Validate.Acceptance);
 		  </script>  
 	  </p>
     <h4>Textarea element</h4>
 		<p>This example will check that the value is filled in.</p>
 		<p>Must be filled in: 
       <br/>
-		  <textarea id="f27" rows="3" cols="10" class="shallow"></textarea>
+		  <textarea id="f28" rows="3" cols="10" class="shallow"></textarea>
 			<script type="text/javascript">
-		    var f27 = new LiveValidation('f27');
-		    f27.add(Validate.Presence);
+		    var f28 = new LiveValidation('f28');
+		    f28.add(Validate.Presence);
 		  </script>  
 	  </p>
 		<h4>Select element</h4>
 		<p>This example will check that the value is not the same as any in your allowed values.</p>
 		<p>Should be &ldquo;Hello world&rdquo;, or &ldquo;Howdy&rdquo;: 
-		  <select id="f28" class="large">
+		  <select id="f29" class="large">
          <option value="Please select...">Please select...</option>
          <option value="Hello world">Hello world</option>
          <option value="Howdy">Howdy</option>
       </select>
 			<script type="text/javascript">
-		    var f28 = new LiveValidation('f28');
-		    f28.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
+		    var f29 = new LiveValidation('f29');
+		    f29.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
 		  </script>  
 	  </p>
   </div>

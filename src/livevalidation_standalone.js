@@ -1,6 +1,8 @@
-// LiveValidation 1.1 (standalone version)
+// LiveValidation 1.2 (standalone version)
 // Copyright (c) 2007 Alec Hill (www.livevalidation.com)
 // LiveValidation is licensed under the terms of the MIT License
+
+/*********************************************** LiveValidation class ***********************************/
 
 /**
  *	validates a form field in real-time based on validations you assign to it
@@ -16,13 +18,19 @@
  *							onInvalid {Function} 	- function to execute when field fails validation
  *													  (DEFAULT: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); })
  *							insertAfterWhatNode {Int} 	- position to insert default message
- *													  (DEFAULT: the field that is being validated)							
+ *													  (DEFAULT: the field that is being validated)	
+ *              onlyOnBlur {Boolean} - whether you want it to validate as you type or only on blur
+ *                            (DEFAULT: false)
+ *              wait {Integer} - the time you want it to pause from the last keystroke before it validates (ms)
+ *                            (DEFAULT: 0)
+ *              onlyOnSubmit {Boolean} - whether should be validated only when the form it belongs to is submitted
+ *                            (DEFAULT: false)						
  */
 var LiveValidation = function(element, optionsObj){
   	this.initialize(element, optionsObj);
 }
 
-/*************************************** element types constants *************************************************/
+/** element types constants ****/
 
 LiveValidation.TEXTAREA 		= 1;
 LiveValidation.TEXT 			    = 2;
@@ -30,7 +38,7 @@ LiveValidation.PASSWORD 		= 3;
 LiveValidation.CHECKBOX 		= 4;
 LiveValidation.SELECT = 5;
 
-/*************************************** Static methods *********************************************/
+/****** Static methods *******/
 
 /**
  *	pass an array of LiveValidation objects and it will validate all of them
@@ -47,7 +55,7 @@ LiveValidation.massValidate = function(validations){
 	return returnValue;
 }
 
-/*********************************************** LiveValidation class ***********************************/
+/****** prototype ******/
 
 LiveValidation.prototype = {
 
@@ -70,6 +78,7 @@ LiveValidation.prototype = {
       // default properties that could not be initialised above
     	this.validations = [];
       this.elementType = this.getElementType();
+      this.form = this.element.form;
       // options
     	var options = optionsObj || {};
     	this.validMessage = options.validMessage || 'Thankyou!';
@@ -78,18 +87,26 @@ LiveValidation.prototype = {
       this.onInvalid = options.onInvalid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };	
     	this.onlyOnBlur =  options.onlyOnBlur || false;
     	this.wait = options.wait || 0;
+      this.onlyOnSubmit = options.onlyOnSubmit || false;
+      // add to form if it has been provided
+      if(this.form){
+        this.formObj = LiveValidationForm.getInstance(this.form);
+        this.formObj.addField(this);
+      }
       // events
     	this.element.onfocus = function(e){ self.doOnFocus(); }
-      switch(this.elementType){
-        case LiveValidation.CHECKBOX:
-          this.element.onclick = function(e){ self.validate(); }
-        // let it run into the next to add a change event too
-        case LiveValidation.SELECT:
-          this.element.onchange = function(e){ self.validate(); }
-          break;
-        default:
-          if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); }
-    	    this.element.onblur = function(e){ self.doOnBlur(); }
+      if(!this.onlyOnSubmit){
+        switch(this.elementType){
+          case LiveValidation.CHECKBOX:
+            this.element.onclick = function(e){ self.validate(); }
+          // let it run into the next to add a change event too
+          case LiveValidation.SELECT:
+            this.element.onchange = function(e){ self.validate(); }
+            break;
+          default:
+            if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); }
+      	    this.element.onblur = function(e){ self.doOnBlur(); }
+        }
       }
     },
     
@@ -317,6 +334,61 @@ LiveValidation.prototype = {
     }
 
 } // end of LiveValidation class
+
+/*************************************** LiveValidationForm class ****************************************/
+/**
+ * This class is used internally by LiveValidation class to associate a LiveValidation field with a form it is icontained in one
+ * 
+ * It will therefore not really ever be needed to be used directly by the developer, unless they want to associate a LiveValidation 
+ * field with a form that it is not a child of
+ */
+
+/**
+   *	handles validation of LiveValidation fields belonging to this form on its submittal
+   *	
+   *	@var element {HTMLFormElement} - a dom element reference to the form to turn into a LiveValidationForm
+   */
+var LiveValidationForm = function(element){
+  this.initialize(element);
+}
+
+/**
+   *	gets the instance of the LiveValidationForm if it has already been made or creates it if it doesnt exist
+   *	
+   *	@var element {HTMLFormElement} - a dom element reference to a form
+   */
+LiveValidationForm.getInstance = function(element){
+  if(!element.id) element.id = 'formId_' + new Date().valueOf();
+  if(!window['LiveValidationForm_' + element.id]) window['LiveValidationForm_' + element.id] = new LiveValidationForm(element);
+  return window['LiveValidationForm_' + element.id];
+}
+
+LiveValidationForm.prototype = {
+  
+  /**
+   *	constructor for LiveValidationForm - handles validation of LiveValidation fields belonging to this form on its submittal
+   *	
+   *	@var element {HTMLFormElement} - a dom element reference to the form to turn into a LiveValidationForm
+   */
+  initialize: function(element){
+    this.element = element;
+    this.fields = [];
+    var self = this;
+    this.element.onsubmit = function(){
+      return LiveValidation.massValidate(self.fields);
+    }
+  },
+  
+  /**
+   *	adds a LiveValidation field to the forms fields array
+   *	
+   *	@var element {LiveValidation} - a LiveValidation object
+   */
+  addField: function(newField){
+    this.fields.push(newField);
+  }
+   
+}// end of LiveValidationForm prototype
 
 /*************************************** Validate class ****************************************/
 /**
