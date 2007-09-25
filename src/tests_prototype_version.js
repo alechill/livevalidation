@@ -13,10 +13,16 @@ function stripSpaces(value){ return value.strip(); }
 
 // simulate events
 Event.simulateEvent = function(element, eventName) {
-  var oEvent = document.createEvent("Events");
-  oEvent.initEvent(eventName, true, true, document.defaultView);
-  $(element).dispatchEvent(oEvent);
-};
+  if(document.createEvent){
+    var oEvent = document.createEvent("Events");
+    oEvent.initEvent(eventName, true, true, document.defaultView);
+    $(element).dispatchEvent(oEvent);
+  }else if( document.createEventObject ) {
+    var oEvent = document.createEventObject();
+    oEvent.relatedTarget = null;
+    $(element).fireEvent('on' + eventName, oEvent);
+  }
+}
 
 // defines and runs all the tests ///////////////////////////
 function runTests(){
