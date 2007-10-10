@@ -422,7 +422,9 @@ function runTests(){
             }else{
                 throw error;
             }
-        } 
+        }
+        // test passes if included and partialMatch: true and caseSensitive: false
+        assert(Validate.Inclusion('heLLo world', {within: ['hEllo', 1], partialMatch: true, caseSensitive: false}));
     }},
     
     testValidateExclusion: function() { with(this){
@@ -468,6 +470,17 @@ function runTests(){
         // test that it fails when is a string using caseSensitive: false
         try{
             assertNotEqual(true, Validate.Exclusion('HeLLo', {within: ['hello', 1], caseSensitive: false}), "Validation should be false (_033_)" );
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Must not be included in the list!", error.message);
+            }else{
+                throw error;
+            }
+        }
+        // test fails if not included and partialMatch: true and caseSensitive: false
+        try{
+          assertNotEqual(true, Validate.Exclusion('heLLo world', {within: ['hEllo', 1], partialMatch: true, caseSensitive: false}), "Validation should be false (_034_)");
         }catch(error){
             assertEqual('ValidationError', error.name);
             if(error.name == 'ValidationError'){
