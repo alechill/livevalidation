@@ -471,6 +471,7 @@ var Validate = {
    *													  (DEFAULT: "Not valid!")
    *							pattern {RegExp} 		- the regular expression pattern
    *													  (DEFAULT: /./)
+   *             negate {Boolean} - if set to true, will validate true if the pattern is not matched
    *
    *  NB. will return true for an empty string, to allow for non-required, empty fields to validate.
    *		If you do not want this to be the case then you must either add a LiveValidation.PRESENCE validation
@@ -480,9 +481,11 @@ var Validate = {
     var value = String(value);
     var params = Object.extend({ 
       failureMessage: "Not valid!",
-      pattern:           /./ 
+      pattern:           /./ ,
+      negate:            false
     }, paramsObj || {});
-    if(!params.pattern.test(value) /* && value != ''*/ ) Validate.fail(params.failureMessage);
+    if(!params.negate && !params.pattern.test(value)) Validate.fail(params.failureMessage); // normal
+    if(params.negate && params.pattern.test(value)) Validate.fail(params.failureMessage); // negated
     return true;
   },
     
@@ -567,21 +570,34 @@ var Validate = {
    *													  (DEFAULT: [])	
    *							allowNull {Bool} 		- if true, and a null value is passed in, validates as true
    *													  (DEFAULT: false)
-   *                         partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
+   *             partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
    *													  (DEFAULT: false)
-   *                         exclusion {Bool} 		- if true, will validate that the value is not within the given set of values
+   *             caseSensitive {Bool} - if false will compare strings case insensitively
+   *                          (DEFAULT: true)
+   *             negate {Bool} - if true, will validate that the value is not within the given set of values
    *													  (DEFAULT: false)			
    */
   Inclusion: function(value, paramsObj){
     var params = Object.extend({
     failureMessage: "Must be included in the list!",
-      within:          [],
-      allowNull:       false,
-      partialMatch:  false,
-      exclusion:      false
+      within:           [],
+      allowNull:        false,
+      partialMatch:   false,
+      caseSensitive: true,
+      negate:          false
     }, paramsObj || {});
     if(params.allowNull && value == null) return true;
     if(!params.allowNull && value == null) Validate.fail(params.failureMessage);
+    //if case insensitive, replace make all strings in the array lowercase, and the value too
+    if(!params.caseSensitive){ 
+      var lowerWithin = [];
+      params.within.each( function(item){
+        if(typeof item == 'string') item = item.toLowerCase();
+        lowerWithin.push(item);
+      });
+      params.within = lowerWithin;
+      if(typeof value == 'string') value = value.toLowerCase();
+    }
     var found = (params.within.indexOf(value) == -1) ? false : true;
     if(params.partialMatch){
       found = false;
@@ -589,7 +605,7 @@ var Validate = {
         if(value.indexOf(arrayVal) != -1 ) found = true;
       }); 
     }
-    if( (!params.exclusion && !found) || (params.exclusion && found) ) Validate.fail(params.failureMessage);
+    if( (!params.negate && !found) || (params.negate && found) ) Validate.fail(params.failureMessage);
     return true;
   },
     
@@ -606,17 +622,20 @@ var Validate = {
    *													  (DEFAULT: [])
    *							allowNull {Bool} 		- if true, and a null value is passed in, validates as true
    *													  (DEFAULT: false)
-   *                          partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
-   *													  (DEFAULT: false)					
+   *             partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
+   *													  (DEFAULT: false)
+   *             caseSensitive {Bool} - if false will compare strings case insensitively
+   *                          (DEFAULT: true)					
    */
   Exclusion: function(value, paramsObj){
     var params = Object.extend({
       failureMessage: "Must not be included in the list!",
       within:             [],
       allowNull:          false,
-      partialMatch:     false
+      partialMatch:     false,
+      caseSensitive:   true
     }, paramsObj || {});
-    params.exclusion = true;// set outside of params so cannot be overridden
+    params.negate = true;// set outside of params so cannot be overridden
     Validate.Inclusion(value, params);
     return true;
   },

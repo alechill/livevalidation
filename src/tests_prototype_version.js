@@ -281,6 +281,18 @@ function runTests(){
                 throw error;
             }
         }
+        // negated version
+        assert(Validate.Format('hello world', {pattern: /live/i, negate: true}));
+        try{
+            assertNotEqual(true, Validate.Format('live validation', {pattern: /live/i, negate: true}), "Validation should be false (_030_)" );
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Not valid!", error.message);
+            }else{
+                throw error;
+            }
+        }
     }},
     
     testValidateLength: function() { with(this) {
@@ -360,10 +372,36 @@ function runTests(){
      
     testValidateInclusion: function() { with(this){
         // test passes if included
-        assert(Validate.Inclusion('hello', {within: ['hello', 'world']}));
+        assert(Validate.Inclusion('hello', {within: ['hello', 1]}));
         // test that it fails when isnt included
         try{
-            assertNotEqual(true, Validate.Inclusion('alec', {within: ['hello', 'world']}), "Validation should be false (_022_)" );
+            assertNotEqual(true, Validate.Inclusion('alec', {within: ['hello', 1]}), "Validation should be false (_022_)" );
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Must be included in the list!", error.message);
+            }else{
+                throw error;
+            }
+        }
+        // test passes if included and partialMatch: true
+        assert(Validate.Inclusion('hello world', {within: ['hello', 1], partialMatch: true}));
+        // test that it fails when partialMatch is false
+        try{
+            assertNotEqual(true, Validate.Inclusion('hello world', {within: ['hello', 1]}), "Validation should be false (_022_)" );
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Must be included in the list!", error.message);
+            }else{
+                throw error;
+            }
+        }
+        // test passes if included and is a string using caseSensitive: false
+        assert(Validate.Inclusion('HeLLo', {within: ['hello', 1], caseSensitive: false}));
+        // test that it fails when case insensitive is true
+        try{
+            assertNotEqual(true, Validate.Inclusion('HeLLo', {within: ['hello', 1]}), "Validation should be false (_031_)" );
         }catch(error){
             assertEqual('ValidationError', error.name);
             if(error.name == 'ValidationError'){
@@ -404,7 +442,6 @@ function runTests(){
         // test passes if passes null and allowNull is set to true
         assert(Validate.Exclusion(null, {within: ['hello', 'world'], allowNull: true}));
         // test that it fails when null is passed and allowNull is false
-
         try{
             assertNotEqual(true, Validate.Exclusion(null, {within: ['hello', 'world']}), "Validation should be false (_025_)" );
         }catch(error){
@@ -414,7 +451,31 @@ function runTests(){
             }else{
                 throw error;
             }
-        } 
+        }
+        // test that it fails when partialMatch is true, and a partial match is found
+        try{
+            assertNotEqual(true, Validate.Exclusion('hello world', {within: ['hello', 1], partialMatch: true}), "Validation should be false (_032_)" );
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Must not be included in the list!", error.message);
+            }else{
+                throw error;
+            }
+        }
+        // test passes if excluded when case insensitive is true
+        assert(Validate.Exclusion('HeLLo', {within: ['hello', 1]}));
+        // test that it fails when is a string using caseSensitive: false
+        try{
+            assertNotEqual(true, Validate.Exclusion('HeLLo', {within: ['hello', 1], caseSensitive: false}), "Validation should be false (_033_)" );
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Must not be included in the list!", error.message);
+            }else{
+                throw error;
+            }
+        }
     }},
     
     testValidateConfirmation: function() { with(this){
