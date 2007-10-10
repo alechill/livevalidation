@@ -41,12 +41,22 @@
 
   <div class="section" id="exampleFormat">
 	  <h3>Format</h3>
-		<p>Format will fail if the value does not match the regular expression.</p>
+    <h4>Normal</h4>
+		<p>Format in its normal state will fail if the value DOES NOT match the regular expression.</p>
 		<p>Should contain the phrase &ldquo;live&rdquo;, anywhere, in any case: 
 		  <input type="text" id="f2" />
 		  <script type="text/javascript">
 		     var f2 = new LiveValidation('f2');
 		     f2.add(Validate.Format, { pattern: /live/i });
+		  </script>  
+    </p>
+     <h4>Negated</h4>
+     <p>Format with parameter negate set to false will fail if the value DOES match the regular expression (does the opposite of the normal Format).</p>
+		<p>Should NOT contain the phrase &ldquo;live&rdquo;, anywhere, in any case: 
+		  <input type="text" id="f30" />
+		  <script type="text/javascript">
+		     var f30 = new LiveValidation('f30');
+		     f30.add(Validate.Format, { pattern: /live/i, negate: true });
 		  </script>  
     </p>
   </div>
@@ -183,14 +193,34 @@
 		    f14.add(Validate.Inclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ] } );
 		  </script>  
 		</p>
-			  
+		
+    <h4>Case insensitive match</h4>
+		<p>This example will check that the value is the same as any in your allowed values, treating strings as case insensitive. Allow case insensitivity by setting the &lsquo;caseSensitive&rsquo; parameter to be false.</p>
+		<p>Should be &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo;, using any case: 
+		  <input type="text" id="f31" />
+			<script type="text/javascript">
+		    var f31 = new LiveValidation('f31');
+		    f31.add(Validate.Inclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], caseSensitive: false } );
+		  </script>  
+	  </p>
+    
 		<h4>Partial match</h4>
-		<p>This example will check that any part of the value matches something in the allowed list. Allow this by setting the &lsquo;partialMatch&rsquo; to be true.</p>
+		<p>This example will check that any part of the value matches something in the allowed list. Allow this by setting the &lsquo;partialMatch&rsquo; parameter to be true.</p>
 		<p>Should contain &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo; somewhere in your entry: 
 		  <input type="text" id="f15" />
 			<script type="text/javascript">
 		    var f15 = new LiveValidation('f15');
 		    f15.add(Validate.Inclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], partialMatch: true } );
+		  </script>  
+	  </p>
+    
+    <h4>Case insensitive, partial match</h4>
+		<p>This example will check that the value is the same as any in your allowed values, treating strings as case insensitive.</p>
+		<p>Should contain &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo; somewhere in your entry, using any case: 
+		  <input type="text" id="f32" />
+			<script type="text/javascript">
+		    var f32 = new LiveValidation('f32');
+		    f32.add(Validate.Inclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], partialMatch: true, caseSensitive: false } );
 		  </script>  
 	  </p>
   </div>	
@@ -208,9 +238,19 @@
 		    f16.add(Validate.Exclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ] } );
 		  </script>  
 	  </p>
-			  
+		
+    <h4>Case insensitive match</h4>
+		<p>This example will check that the value is not the same as any in your allowed values, treating strings as case insensitive. Allow case insensitivity by setting the &lsquo;caseSensitive&rsquo; parameter to be false.</p>
+		<p>Should not be &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo;, using any case: 
+		  <input type="text" id="f33" />
+			<script type="text/javascript">
+		    var f33 = new LiveValidation('f33');
+		    f33.add(Validate.Exclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], caseSensitive: false } );
+		  </script>  
+	  </p>
+    
 	  <h4>Partial match</h4>
-		<p>This example will check that no part of the value matches something in the disallowed list. Allow this by setting the &lsquo;partialMatch&rsquo; to be true.</p>
+		<p>This example will check that no part of the value matches something in the disallowed list. Allow this by setting the &lsquo;partialMatch&rsquo; parameter to be true.</p>
 		<p>Should not contain &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo; anywhere in your entry: 
 		  <input type="text" id="f17" />
 			<script type="text/javascript">
@@ -218,6 +258,16 @@
 		    f17.add(Validate.Exclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], partialMatch: true } );
 		  </script>  
     </p>
+    
+    <h4>Case insensitive, partial match</h4>
+		<p>This example will check that no part of the value matches something in the disallowed list, treating strings as case insensitive.</p>
+		<p>Should not contain &ldquo;cow&rdquo;, &ldquo;pigeon&rdquo;, or &ldquo;giraffe&rdquo; anywhere in your entry, using any case: 
+		  <input type="text" id="f34" />
+			<script type="text/javascript">
+		    var f34 = new LiveValidation('f34');
+		    f34.add(Validate.Exclusion, { within: [ 'cow' , 'pigeon', 'giraffe' ], partialMatch: true, caseSensitive: false } );
+		  </script>  
+	  </p>
   </div>
   
   <div class="section" id="exampleAcceptance">
