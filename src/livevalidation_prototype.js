@@ -589,7 +589,7 @@ var Validate = {
     }, paramsObj || {});
     if(params.allowNull && value == null) return true;
     if(!params.allowNull && value == null) Validate.fail(params.failureMessage);
-    //if case insensitive, replace make all strings in the array lowercase, and the value too
+    //if case insensitive, make all strings in the array lowercase, and the value too
     if(!params.caseSensitive){ 
       var lowerWithin = [];
       params.within.each( function(item){

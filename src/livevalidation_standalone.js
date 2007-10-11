@@ -593,20 +593,34 @@ var Validate = {
      *													  (DEFAULT: false)
      *             partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
      *													  (DEFAULT: false)
+     *             caseSensitive {Bool} - if false will compare strings case insensitively
+     *                          (DEFAULT: true)
      *             negate {Bool} 		- if true, will validate that the value is not within the given set of values
      *													  (DEFAULT: false)			
      */
     Inclusion: function(value, paramsObj){
     	var paramsObj = paramsObj || {};
     	var message = paramsObj.failureMessage || "Must be included in the list!";
+      var caseSensitive = (paramsObj.caseSensitive === false) ? false : true;
     	if(paramsObj.allowNull && value == null) return true;
-      if(!paramsObj.allowNull && value == null) Validate.fail(message)
-    	var list = paramsObj.within || [];
+      if(!paramsObj.allowNull && value == null) Validate.fail(message);
+    	var within = paramsObj.within || [];
+      //if case insensitive, make all strings in the array lowercase, and the value too
+      if(!caseSensitive){ 
+        var lowerWithin = [];
+        for(var j = 0, length = within.length; j < length; ++j){
+        	var item = within[j];
+          if(typeof item == 'string') item = item.toLowerCase();
+          lowerWithin.push(item);
+        }
+        within = lowerWithin;
+        if(typeof value == 'string') value = value.toLowerCase();
+      }
     	var found = false;
-    	for(var i = 0, length = list.length; i < length; ++i){
-    	  if(list[i] == value) found = true;
+    	for(var i = 0, length = within.length; i < length; ++i){
+    	  if(within[i] == value) found = true;
         if(paramsObj.partialMatch){ 
-          if(value.indexOf(list[i]) != -1) found = true;
+          if(value.indexOf(within[i]) != -1) found = true;
         }
     	}
     	if( (!paramsObj.negate && !found) || (paramsObj.negate && found) ) Validate.fail(message);
@@ -626,8 +640,10 @@ var Validate = {
      *													  (DEFAULT: [])
      *							allowNull {Bool} 		- if true, and a null value is passed in, validates as true
      *													  (DEFAULT: false)
-     *                         partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
-     *													  (DEFAULT: false)			
+     *             partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
+     *													  (DEFAULT: false)
+     *             caseSensitive {Bool} - if false will compare strings case insensitively
+     *                          (DEFAULT: true)			
      */
     Exclusion: function(value, paramsObj){
       var paramsObj = paramsObj || {};
