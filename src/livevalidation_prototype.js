@@ -472,6 +472,7 @@ var Validate = {
    *							pattern {RegExp} 		- the regular expression pattern
    *													  (DEFAULT: /./)
    *             negate {Boolean} - if set to true, will validate true if the pattern is not matched
+   *                           (DEFAULT: false)
    *
    *  NB. will return true for an empty string, to allow for non-required, empty fields to validate.
    *		If you do not want this to be the case then you must either add a LiveValidation.PRESENCE validation

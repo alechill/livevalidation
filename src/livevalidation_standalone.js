@@ -495,19 +495,21 @@ var Validate = {
      *													  (DEFAULT: "Not valid!")
      *							pattern {RegExp} 		- the regular expression pattern
      *													  (DEFAULT: /./)
+     *             negate {Boolean} - if set to true, will validate true if the pattern is not matched
+   *                           (DEFAULT: false)
      *
      *  NB. will return true for an empty string, to allow for non-required, empty fields to validate.
      *		If you do not want this to be the case then you must either add a LiveValidation.PRESENCE validation
      *		or build it into the regular expression pattern
      */
     Format: function(value, paramsObj){
-      	var value = String(value);
+      var value = String(value);
     	var paramsObj = paramsObj || {};
     	var message = paramsObj.failureMessage || "Not valid!";
-      	var pattern = paramsObj.pattern || /./;
-    	if(!pattern.test(value) /* && value != ''*/ ){ 
-    	  	Validate.fail(message);
-    	}
+      var pattern = paramsObj.pattern || /./;
+      var negate = paramsObj.negate || false;
+      if(!negate && !pattern.test(value)) Validate.fail(message); // normal
+      if(negate && pattern.test(value)) Validate.fail(message); // negated
     	return true;
     },
     
@@ -589,25 +591,25 @@ var Validate = {
      *													  (DEFAULT: [])	
      *							allowNull {Bool} 		- if true, and a null value is passed in, validates as true
      *													  (DEFAULT: false)
-     *                         partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
+     *             partialMatch {Bool} 	- if true, will not only validate against the whole value to check but also if it is a substring of the value 
      *													  (DEFAULT: false)
-     *                         exclusion {Bool} 		- if true, will validate that the value is not within the given set of values
+     *             negate {Bool} 		- if true, will validate that the value is not within the given set of values
      *													  (DEFAULT: false)			
      */
     Inclusion: function(value, paramsObj){
     	var paramsObj = paramsObj || {};
     	var message = paramsObj.failureMessage || "Must be included in the list!";
     	if(paramsObj.allowNull && value == null) return true;
-        if(!paramsObj.allowNull && value == null) Validate.fail(message)
+      if(!paramsObj.allowNull && value == null) Validate.fail(message)
     	var list = paramsObj.within || [];
     	var found = false;
     	for(var i = 0, length = list.length; i < length; ++i){
-    	  	if(list[i] == value) found = true;
-            if(paramsObj.partialMatch){ 
-                if(value.indexOf(list[i]) != -1) found = true;
-            }
+    	  if(list[i] == value) found = true;
+        if(paramsObj.partialMatch){ 
+          if(value.indexOf(list[i]) != -1) found = true;
+        }
     	}
-    	if( (!paramsObj.exclusion && !found) || (paramsObj.exclusion && found) ) Validate.fail(message);
+    	if( (!paramsObj.negate && !found) || (paramsObj.negate && found) ) Validate.fail(message);
     	return true;
     },
     
@@ -628,11 +630,11 @@ var Validate = {
      *													  (DEFAULT: false)			
      */
     Exclusion: function(value, paramsObj){
-        var paramsObj = paramsObj || {};
+      var paramsObj = paramsObj || {};
     	paramsObj.failureMessage = paramsObj.failureMessage || "Must not be included in the list!";
-        paramsObj.exclusion = true;
+      paramsObj.negate = true;
     	Validate.Inclusion(value, paramsObj);
-        return true;
+      return true;
     },
     
     /**
