@@ -1,7 +1,7 @@
 /**
  * @author alec.hill
  * 
- * tests for LiveValidation 1.2 (prototype.js version)
+ * tests for LiveValidation 1.3 (prototype.js version)
  */
 
 // <![CDATA[

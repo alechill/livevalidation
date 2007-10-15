@@ -1,7 +1,7 @@
 /**
  * @author alec.hill
  * 
- * tests for LiveValidation 1.2 (standalone version)
+ * tests for LiveValidation 1.3 (standalone version)
  */
 
 // <![CDATA[
