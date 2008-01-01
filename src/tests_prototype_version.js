@@ -1,5 +1,5 @@
 /**
- * @author alec.hill
+ * @author Alec Hill
  * 
  * tests for LiveValidation 1.3 (prototype.js version)
  */
@@ -22,6 +22,13 @@ Event.simulateEvent = function(element, eventName) {
     oEvent.relatedTarget = null;
     $(element).fireEvent('on' + eventName, oEvent);
   }
+}
+
+// clears all events defined by prototype, as this was made private in prototype 1.6, must define our own
+Event.unloadCache = function() {
+  for (var id in Event.cache)
+    for (var eventName in Event.cache[id])
+      Event.cache[id][eventName] = null;
 }
 
 // defines and runs all the tests ///////////////////////////

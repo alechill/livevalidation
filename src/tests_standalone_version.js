@@ -1,5 +1,5 @@
 /**
- * @author alec.hill
+ * @author Alec Hill
  * 
  * tests for LiveValidation 1.3 (standalone version)
  */
@@ -12,16 +12,124 @@
 function stripSpaces(value){ return value.strip(); }
 
 // simulate events
-Event.simulateEvent = function(element, eventName) {
+Event.simulateEvent = function(element, eventName, optionsObj) {
+  var options = Object.extend({
+    bubbles: true,
+    cancelable: true,
+    view: window
+  }, optionsObj || {});
   if(document.createEvent){
-    var oEvent = document.createEvent("Events");
-    oEvent.initEvent(eventName, true, true, document.defaultView);
-    $(element).dispatchEvent(oEvent);
+    try {
+      var oEvent = document.createEvent("Events");
+    }catch (err) {
+      var oEvent = document.createEvent("UIEvents");
+    }finally{
+      oEvent.initEvent(eventName, options.bubbles, options.cancelable, options.view);
+      
+      try{Object.extend(oEvent, options);}catch(error){}
+      $(element).dispatchEvent(oEvent);
+    }
   }else if( document.createEventObject ) {
     var oEvent = document.createEventObject();
-    oEvent.relatedTarget = null;
+    oEvent.relatedTarget = $(element);
+    Object.extend(oEvent, options);
     $(element).fireEvent('on' + eventName, oEvent);
   }
+}
+
+Event.simulateMouseEvent = function(element, eventName, optionsObj) {
+  var options = Object.extend({
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    detail: 1,
+    screenX: 0,
+    screenY: 0,
+    clientX: 0,
+    clientY: 0,
+    ctrlKey: false,
+    altKey: false,
+    shiftKey: false,
+    metaKey: false,
+    button: 0,
+    relatedTarget: $(element)
+  }, optionsObj || {});
+  if(document.createEvent){
+    try{
+      var oEvent = document.createEvent("MouseEvents");
+      oEvent.initMouseEvent(eventName, options.bubbles, options.cancelable, options.view, options.detail, options.screenX, options.screenY, options.clientX, options.clientY, options.ctrlKey, options.altKey, options.shiftKey, options.metaKey, options.button, options.relatedTarget);
+      $(element).dispatchEvent(oEvent);
+    }catch(error){
+      Event.simulateEvent(element, eventName, options);
+    }
+  }else if( document.createEventObject ){
+    // rearrange for ie implementation of button
+    switch(options.button){
+      case 0:
+        optionst.button = 1;
+        break;
+      case 1:
+        options.button = 4;
+        break;
+      case 2:
+        break;
+      default:
+        options.button = 0;                    
+      }   
+      Event.simulateEvent(element, eventName, options);
+  }
+}
+
+Event.simulateKeyEvent = function(element, eventName, optionsObj) {
+  var options = Object.extend({
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    altKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    metaKey: false,
+    keyCode: 0,
+    charCode: 0
+  }, optionsObj || {});
+  if(document.createEvent){
+    try{
+      var oEvent = document.createEvent("KeyboardEvent");
+      oEvent.initKeyEvent(eventName, options.bubbles, options.cancelable, options.view, options.ctrlKey, options.altKey, options.shiftKey, options.metaKey, options.keyCode, options.charCode);
+      $(element).dispatchEvent(oEvent);
+    }catch(err){
+      Event.simulateEvent(element, eventName, options);
+    }
+    //$(element).dispatchEvent(oEvent);
+  }else if( document.createEventObject ){
+    Event.simulateEvent(element, eventName, options);
+    //var oEvent = document.createEventObject();
+    //oEvent.relatedTarget = $(element);
+    /*oEvent.bubbles = options.bubbles;
+    oEvent.cancelable = options.cancelable;
+    oEvent.charCode = options.charCode;
+    oEvent.ctrlKey = options.ctrlKey;
+    oEvent.altKey = options.altKey;
+    oEvent.shiftKey = options.shiftKey;
+    oEvent.metaKey = options.metaKey;*/  
+    //Object.extend(oEvent, options);
+    //oEvent.keyCode = (options.charCode > 0) ? options.charCode : options.keyCode;    
+    //oEvent.charCode = null;
+    //$(element).fireEvent('on' + eventName, oEvent);
+  }
+}
+
+Event.simulateIEEvent = function(element, eventName){
+  var oEvent = document.createEventObject();
+  oEvent.relatedTarget = $(element);
+  $(element).fireEvent('on' + eventName, oEvent);
+}
+
+// clears all events defined by prototype, as this was made private in prototype 1.6, must define our own
+Event.unloadCache = function() {
+  for (var id in Event.cache)
+    for (var eventName in Event.cache[id])
+      Event.cache[id][eventName] = null;
 }
 
 // defines and runs all the tests ///////////////////////////
@@ -31,6 +139,21 @@ function runTests(){
   new Test.Unit.Runner({
     
     setup: function() { with(this) {
+        // set up some pre defined events to check they are preserved
+        var el = $('myText');
+        el.focusCheck = false;
+        el.onfocus = function(){ this.focusCheck = true; }
+        el.blurCheck = false;
+        el.onblur = function(){ this.blurCheck = true; }
+        el.keyupCheck = false;
+        el.onkeyup = function(){ this.keyupCheck = true; }
+        var chkEl = $('myCheckbox');
+        chkEl.clickCheck = false;
+        chkEl.onclick = function(){ this.clickCheck = true; }
+        var selectEl = $('mySelect');
+        selectEl.changeCheck = false;
+        selectEl.onchange = function(){ this.changeCheck = true; }
+        // make the LiveValidation object
         lv = new LiveValidation('myText');
     }},
     
@@ -575,7 +698,7 @@ function runTests(){
         var params = {failureMessage: 'Invalid!'};
         lv.add(Validate.Presence, params);
         // tets it is held as an object
-        assertEqual('object', typeof lv.validations[0], "The validation should be stored of an object");
+        assertEqual('object', typeof lv.validations[0], "The validation should be stored as an object");
         // test that this has been passed into the validations array
         assertEqual(1, lv.validations.length, "Length should be 1" );
         // test vthat it is holding the passd in validation correctly
@@ -806,8 +929,42 @@ function runTests(){
          assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message now that the form has submitted");
      }},
      
+     testPreserveOldOnFocus: function(){ with(this){
+        Event.simulateEvent(lv.element, 'focus');
+        assertEqual(true, lv.element.focusCheck);     
+     }},
+     
+     testPreserveOldOnBlur: function(){ with(this){
+        Event.simulateEvent(lv.element, 'blur');
+        assertEqual(true, lv.element.blurCheck);     
+     }},
+     
+     testPreserveOldOnClick: function(){ with(this){
+        lv2 = new LiveValidation('myCheckbox');
+        Event.simulateMouseEvent(lv2.element, 'click');
+        assertEqual(true, lv2.element.clickCheck);     
+     }},
+     
+     testPreserveOldOnChange: function(){ with(this){
+        lv2 = new LiveValidation('mySelect');
+        Event.simulateEvent(lv2.element, 'change');
+        assertEqual(true, lv2.element.changeCheck);     
+     }},
+     
+     testPreserveOldOnKeyup: function(){ with(this){
+        Event.simulateKeyEvent(lv.element, 'keyup');
+        assertEqual(true, lv.element.keyupCheck, {keyCode: 9});     
+     }},
+    
      testLiveValidationFormIsInstantiated: function(){ with(this){
        assertNotNull(window['LiveValidationForm_myForm'], "window['LiveValidationForm_myForm'] should have been created by the first LiveValidation object");
+     }},
+    
+     testLiveValidationFormIdGenerated: function(){ with(this){
+       $('myForm').id = null;
+       lv = new LiveValidation('myText');
+       assertNotNull(lv.form.id, "form should have a randomly generated id assigned to it");
+       assert(lv.form.id.indexOf('.') == -1, "randomly generated id of form should not have a decimal point in it")
      }}
 
   }, "testlog");

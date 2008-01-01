@@ -94,18 +94,24 @@ LiveValidation.prototype = {
         this.formObj.addField(this);
       }
       // events
-    	this.element.onfocus = function(e){ self.doOnFocus(); }
+      // collect old events
+      this.oldOnFocus = this.element.onfocus || function(){};
+      this.oldOnBlur = this.element.onblur || function(){};
+      this.oldOnClick = this.element.onclick || function(){};
+      this.oldOnChange = this.element.onchange || function(){};
+      this.oldOnKeyup = this.element.onkeyup || function(){};
+    	this.element.onfocus = function(e){ self.doOnFocus(e); return self.oldOnFocus.call(this, e); }
       if(!this.onlyOnSubmit){
         switch(this.elementType){
           case LiveValidation.CHECKBOX:
-            this.element.onclick = function(e){ self.validate(); }
+            this.element.onclick = function(e){ self.validate(); return self.oldOnClick.call(this, e); }
           // let it run into the next to add a change event too
           case LiveValidation.SELECT:
-            this.element.onchange = function(e){ self.validate(); }
+            this.element.onchange = function(e){ self.validate(); return self.oldOnChange.call(this, e); }
             break;
           default:
-            if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); }
-      	    this.element.onblur = function(e){ self.doOnBlur(); }
+            if(!this.onlyOnBlur) this.element.onkeyup = function(e){;self.deferValidation(); return self.oldOnKeyup.call(this, e); }
+      	    this.element.onblur = function(e){ self.doOnBlur(e); return self.oldOnBlur.call(this, e); }
         }
       }
     },
@@ -145,7 +151,7 @@ LiveValidation.prototype = {
      */
     doOnFocus: function(e){
       this.focused = true;
-      this.removeMessageAndFieldClass()
+      this.removeMessageAndFieldClass();
     },
     
     /**
@@ -358,7 +364,8 @@ var LiveValidationForm = function(element){
    *	@var element {HTMLFormElement} - a dom element reference to a form
    */
 LiveValidationForm.getInstance = function(element){
-  if(!element.id) element.id = 'formId_' + new Date().valueOf();
+  var rand = Math.random() * Math.random();
+  if(!element.id) element.id = 'formId_' + rand.toString().replace(/\./, '') + new Date().valueOf();
   if(!window['LiveValidationForm_' + element.id]) window['LiveValidationForm_' + element.id] = new LiveValidationForm(element);
   return window['LiveValidationForm_' + element.id];
 }
@@ -374,8 +381,10 @@ LiveValidationForm.prototype = {
     this.element = element;
     this.fields = [];
     var self = this;
-    this.element.onsubmit = function(){
-      return LiveValidation.massValidate(self.fields);
+    // preserve the old onsubmit event
+    var oldOnSubmit = this.element.onsubmit || function(){};
+    this.element.onsubmit = function(e){
+      return (LiveValidation.massValidate(self.fields) && oldOnSubmit.call(element, e) !== false);     
     }
   },
   
