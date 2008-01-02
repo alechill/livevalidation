@@ -25,7 +25,6 @@ Event.simulateEvent = function(element, eventName, optionsObj) {
       var oEvent = document.createEvent("UIEvents");
     }finally{
       oEvent.initEvent(eventName, options.bubbles, options.cancelable, options.view);
-      
       try{Object.extend(oEvent, options);}catch(error){}
       $(element).dispatchEvent(oEvent);
     }
@@ -119,12 +118,6 @@ Event.simulateKeyEvent = function(element, eventName, optionsObj) {
   }
 }
 
-Event.simulateIEEvent = function(element, eventName){
-  var oEvent = document.createEventObject();
-  oEvent.relatedTarget = $(element);
-  $(element).fireEvent('on' + eventName, oEvent);
-}
-
 // clears all events defined by prototype, as this was made private in prototype 1.6, must define our own
 Event.unloadCache = function() {
   for (var id in Event.cache)
@@ -153,6 +146,9 @@ function runTests(){
         var selectEl = $('mySelect');
         selectEl.changeCheck = false;
         selectEl.onchange = function(){ this.changeCheck = true; }
+        var formEl = $('myForm');
+        formEl.submitCheck = false;
+        formEl.onsubmit = function(){ this.submitCheck = true; return false; }
         // make the LiveValidation object
         lv = new LiveValidation('myText');
     }},
@@ -959,12 +955,18 @@ function runTests(){
      testLiveValidationFormIsInstantiated: function(){ with(this){
        assertNotNull(window['LiveValidationForm_myForm'], "window['LiveValidationForm_myForm'] should have been created by the first LiveValidation object");
      }},
-    
+
      testLiveValidationFormIdGenerated: function(){ with(this){
        $('myForm').id = null;
        lv = new LiveValidation('myText');
        assertNotNull(lv.form.id, "form should have a randomly generated id assigned to it");
        assert(lv.form.id.indexOf('.') == -1, "randomly generated id of form should not have a decimal point in it")
+       lv.form.id = 'myForm'; // reset the id of the form in case its needed later
+     }},
+    
+     testLiveValidationFormPreserveOldOnSubmit: function(){ with(this){
+       Event.simulateEvent(lv.form, 'submit');
+       assertEqual(true, lv.form.submitCheck);     
      }}
 
   }, "testlog");
