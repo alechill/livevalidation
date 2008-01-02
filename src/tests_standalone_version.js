@@ -65,7 +65,7 @@ Event.simulateMouseEvent = function(element, eventName, optionsObj) {
     // rearrange for ie implementation of button
     switch(options.button){
       case 0:
-        optionst.button = 1;
+        options.button = 1;
         break;
       case 1:
         options.button = 4;
