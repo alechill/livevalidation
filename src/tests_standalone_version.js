@@ -99,22 +99,8 @@ Event.simulateKeyEvent = function(element, eventName, optionsObj) {
     }catch(err){
       Event.simulateEvent(element, eventName, options);
     }
-    //$(element).dispatchEvent(oEvent);
   }else if( document.createEventObject ){
     Event.simulateEvent(element, eventName, options);
-    //var oEvent = document.createEventObject();
-    //oEvent.relatedTarget = $(element);
-    /*oEvent.bubbles = options.bubbles;
-    oEvent.cancelable = options.cancelable;
-    oEvent.charCode = options.charCode;
-    oEvent.ctrlKey = options.ctrlKey;
-    oEvent.altKey = options.altKey;
-    oEvent.shiftKey = options.shiftKey;
-    oEvent.metaKey = options.metaKey;*/  
-    //Object.extend(oEvent, options);
-    //oEvent.keyCode = (options.charCode > 0) ? options.charCode : options.keyCode;    
-    //oEvent.charCode = null;
-    //$(element).fireEvent('on' + eventName, oEvent);
   }
 }
 
@@ -134,23 +120,24 @@ function runTests(){
     setup: function() { with(this) {
         // set up some pre defined events to check they are preserved
         var el = $('myText');
-        el.focusCheck = false;
+        //el.focusCheck = false;
         el.onfocus = function(){ this.focusCheck = true; }
-        el.blurCheck = false;
+        //el.blurCheck = false;
         el.onblur = function(){ this.blurCheck = true; }
-        el.keyupCheck = false;
+        //el.keyupCheck = false;
         el.onkeyup = function(){ this.keyupCheck = true; }
         var chkEl = $('myCheckbox');
-        chkEl.clickCheck = false;
+        //chkEl.clickCheck = false;
         chkEl.onclick = function(){ this.clickCheck = true; }
         var selectEl = $('mySelect');
-        selectEl.changeCheck = false;
+        //selectEl.changeCheck = false;
         selectEl.onchange = function(){ this.changeCheck = true; }
         var formEl = $('myForm');
-        formEl.submitCheck = false;
+        //formEl.submitCheck = false;
         formEl.onsubmit = function(){ this.submitCheck = true; return false; }
-        // make the LiveValidation object
+        // make the first LiveValidation object and first inline events one
         lv = new LiveValidation('myText');
+		ilv = new LiveValidation('myInlineText');
     }},
     
     teardown: function() { with(this) {
@@ -951,22 +938,57 @@ function runTests(){
         Event.simulateKeyEvent(lv.element, 'keyup');
         assertEqual(true, lv.element.keyupCheck, {keyCode: 9});     
      }},
+	 
+	 testPreserveInlineOldOnFocus: function(){ with(this){
+        Event.simulateEvent(ilv.element, 'focus');
+        assertEqual(true, ilv.element.inlineFocusCheck);     
+     }},
+     
+     testPreserveInlineOldOnBlur: function(){ with(this){
+        Event.simulateEvent(ilv.element, 'blur');
+        assertEqual(true, ilv.element.inlineBlurCheck);     
+     }},
+     
+     testPreserveInlineOldOnClick: function(){ with(this){
+        ilv2 = new LiveValidation('myInlineCheckbox');
+        Event.simulateMouseEvent(ilv2.element, 'click');
+        assertEqual(true, ilv2.element.inlineClickCheck);     
+     }},
+     
+     testPreserveInlineOldOnChange: function(){ with(this){
+        ilv2 = new LiveValidation('myInlineSelect');
+        Event.simulateEvent(ilv2.element, 'change');
+        assertEqual(true, ilv2.element.inlineChangeCheck);     
+     }},
+	 
+	 testPreserveInlineOldOnKeyup: function(){ with(this){
+        Event.simulateKeyEvent(ilv.element, 'keyup');
+	   ilv.add(Validate.Presence);
+        assertEqual(true, ilv.element.inlineKeyupCheck, {keyCode: 9});     
+     }},
     
      testLiveValidationFormIsInstantiated: function(){ with(this){
        assertNotNull(window['LiveValidationForm_myForm'], "window['LiveValidationForm_myForm'] should have been created by the first LiveValidation object");
      }},
 
      testLiveValidationFormIdGenerated: function(){ with(this){
-       $('myForm').id = null;
-       lv = new LiveValidation('myText');
-       assertNotNull(lv.form.id, "form should have a randomly generated id assigned to it");
-       assert(lv.form.id.indexOf('.') == -1, "randomly generated id of form should not have a decimal point in it")
-       lv.form.id = 'myForm'; // reset the id of the form in case its needed later
+       ilv = new LiveValidation('myInlineText');
+       assertNotNull(ilv.form.id, "form should have a randomly generated id assigned to it");
+       assert(ilv.form.id.indexOf('.') == -1, "randomly generated id of form should not have a decimal point in it")
      }},
     
      testLiveValidationFormPreserveOldOnSubmit: function(){ with(this){
+       // add a validation rule so that form wont submit
+	   lv.add(Validate.Presence);
        Event.simulateEvent(lv.form, 'submit');
        assertEqual(true, lv.form.submitCheck);     
+     }},
+    
+     testLiveValidationFormPreserveInlineOldOnSubmit: function(){ with(this){
+       // add a validation rule so that form wont submit
+	   ilv.add(Validate.Presence);
+       Event.simulateEvent(ilv.form, 'submit');
+       assertEqual(true, ilv.form.inlineSubmitCheck);     
      }}
 
   }, "testlog");

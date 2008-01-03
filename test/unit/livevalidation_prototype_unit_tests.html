@@ -36,7 +36,7 @@
   <!-- field for testing Validate.Confirmation -->
   <input id="matchField" type="hidden" value="hello world"/>
   
-  <!-- fileds for general testing -->
+  <!-- fields for general testing -->
   <form action="#" id="myForm">
   	<p><input id="myText" type="text" value=""/></p>
     <p><input id="myPassword" type="password" value=""/></p>
@@ -44,6 +44,19 @@
     <p><input id="myCheckbox" type="checkbox" value="accept me"/></p>
     <p>
       <select id="mySelect">
+         <option value="Please select...">Please select...</option>
+         <option value="Hello world">Hello world</option>
+         <option value="Howdy">Howdy</option>
+      </select>
+    </p>
+  </form>
+  
+  <!-- fields for inline event testing -->
+  <form action="#" onsubmit="this.inlineSubmitCheck = true;">
+  	<p><input id="myInlineText" type="text" value="" onfocus="this.inlineFocusCheck = true;" onblur="this.inlineBlurCheck = true;" onkeyup="this.inlineKeyupCheck = true;"/></p>
+    <p><input id="myInlineCheckbox" type="checkbox" value="accept me" onclick="this.inlineClickCheck = true;"/></p>
+    <p>
+      <select id="myInlineSelect" onchange="this.inlineChangeCheck = true;">
          <option value="Please select...">Please select...</option>
          <option value="Hello world">Hello world</option>
          <option value="Howdy">Howdy</option>
