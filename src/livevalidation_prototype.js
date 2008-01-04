@@ -93,22 +93,60 @@ LiveValidation.prototype = {
       this.formObj.addField(this);
     }
     // events
-    Event.observe(this.element, 'focus', this.doOnFocus.bindAsEventListener(this)); // this sets the focused flag
+	// event callbacks are cached so they can be stopped being observed
+	this.boundFocus = this.doOnFocus.bindAsEventListener(this);
+    Event.observe(this.element, 'focus', this.boundFocus);
     if(!this.onlyOnSubmit){
       switch(this.elementType){
         case LiveValidation.CHECKBOX:
-          Event.observe(this.element, 'click', this.validate.bindAsEventListener(this));
+		  this.boundClick = this.validate.bindAsEventListener(this);
+          Event.observe(this.element, 'click', this.boundClick);
           // let it run into the next to add a change event too
         case LiveValidation.SELECT:
-          Event.observe(this.element, 'change', this.validate.bindAsEventListener(this));
+		  this.boundChange = this.validate.bindAsEventListener(this);
+          Event.observe(this.element, 'change', this.boundChange);
           break;
         default:
-          if(!this.onlyOnBlur) Event.observe(this.element, 'keyup', this.deferValidation.bindAsEventListener(this));
-          Event.observe(this.element, 'blur', this.validate.bindAsEventListener(this));
+          if (!this.onlyOnBlur) {
+		  	this.boundKeyup = this.deferValidation.bindAsEventListener(this);
+		  	Event.observe(this.element, 'keyup', this.boundKeyup);
+		  }
+          this.boundBlur = this.validate.bindAsEventListener(this);
+		  Event.observe(this.element, 'blur', this.boundBlur);
       }
     }
   },
-		
+  
+  /**
+   *	destroy this instance and its events
+   */
+  destroy: function(){
+    // remove events
+    Event.stopObserving(this.element, 'focus', this.boundFocus);
+    if(!this.onlyOnSubmit){
+      switch(this.elementType){
+        case LiveValidation.CHECKBOX:
+          Event.stopObserving(this.element, 'click', this.boundClick);
+          // let it run into the next to add a change event too
+        case LiveValidation.SELECT:
+          Event.stopObserving(this.element, 'change', this.boundChange);
+          break;
+        default:
+          if(!this.onlyOnBlur) Event.stopObserving(this.element, 'keyup', this.boundKeyup);
+          Event.stopObserving(this.element, 'blur', this.boundBlur);
+      }
+    }
+	if(this.formObj){
+		// remove the field from the LiveValidationForm
+		this.formObj.removeField();
+		// destroy the LiveValidationForm if no LiveValidation fields left in it
+		this.formObj.destroy();
+	}
+	// reset this object to undefined (cant' use 'this' as left assignment though)
+	var self = this;
+	self = undefined;
+  },
+  
   /**
    *	adds a validation to perform to a LiveValidation object
    *
@@ -347,10 +385,24 @@ LiveValidationForm.prototype = {
   initialize: function(element){
     this.element = $(element);
     this.fields = [];
-    //var self = this;
-    this.element.onsubmit = function(){
-      return LiveValidation.massValidate(this.fields);
-    }.bind(this);
+    // need to capture onsubmit in this way rather than Event.observe because Rails helpers add events inline
+	// and must ensure that the validation is run before any previous submit events
+	/*this.element.oldOnSubmit = this.element.onsubmit || function(){};
+    this.element.onsubmit = function(e){
+	  var valid = LiveValidation.massValidate(this.fields);
+      var old = this.element.oldOnSubmit(e) !== false;
+      return (valid && old);     
+    }.bindAsEventListener(this);*/
+	this.boundSubmit = function(e){
+		alert('hello');
+	  return LiveValidation.massValidate(this.fields);    
+    }.bindAsEventListener(this);
+	Event.observe(this.element, 'submit', this.boundSubmit);
+	//alert(this.element.id);
+	/*function(e){
+		//alert(this.element);
+	  return LiveValidation.massValidate(this.fields);    
+    }.bindAsEventListener(this));*/
   },
   
   /**
@@ -360,6 +412,29 @@ LiveValidationForm.prototype = {
    */
   addField: function(newField){
     this.fields.push(newField);
+  },
+  
+  /**
+   *	removess a LiveValidation field from the forms fields array
+   *	
+   *	@var element {LiveValidation} - a LiveValidation object
+   */
+  removeField: function(victim){
+    this.fields = this.fields.without(victim);
+  },
+  
+  /**
+   *	destroy this instance and its events
+   */
+  destroy: function(){
+  	// only destroy if has no fields
+  	if (this.fields.length != 0) return false;
+	// remove events
+	Event.stopObserving(this.element, 'focus', this.boundSubmit);
+	// reset this object to undefined (cant' use 'this' as left assignment though)
+	var self = this;
+	self = undefined;
+	return true;
   }
    
 }// end of LiveValidationForm prototype

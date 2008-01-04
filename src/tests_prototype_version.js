@@ -120,30 +120,42 @@ function runTests(){
     setup: function() { with(this) {
         // set up some pre defined events to check they are preserved
         var el = $('myText');
-        //el.focusCheck = false;
+        el.focusCheck = false;
         el.onfocus = function(){ this.focusCheck = true; }
-        //el.blurCheck = false;
+        el.blurCheck = false;
         el.onblur = function(){ this.blurCheck = true; }
-        //el.keyupCheck = false;
+        el.keyupCheck = false;
         el.onkeyup = function(){ this.keyupCheck = true; }
         var chkEl = $('myCheckbox');
-        //chkEl.clickCheck = false;
+        chkEl.clickCheck = false;
         chkEl.onclick = function(){ this.clickCheck = true; }
         var selectEl = $('mySelect');
-        //selectEl.changeCheck = false;
+        selectEl.changeCheck = false;
         selectEl.onchange = function(){ this.changeCheck = true; }
         var formEl = $('myForm');
-        //formEl.submitCheck = false;
+        formEl.submitCheck = false;
         formEl.onsubmit = function(){ this.submitCheck = true; return false; }
-        // make the first LiveValidation object and first inline events one
-        lv = new LiveValidation('myText');
-		ilv = new LiveValidation('myInlineText');
+        // make the first LiveValidation object and first inline events one and define others
+		// scoped on an object
+		subjects = {};
+        subjects.lv = new LiveValidation('myText');
+		subjects.lv2;
+		subjects.lv3;
+		subjects.lv4;
+		subjects.lv5;
+		subjects.ilv = new LiveValidation('myInlineText');
+		subjects.ilv2;
     }},
     
     teardown: function() { with(this) {
-        lv = null;
-        window['LiveValidationForm_myForm'] = null;
-        Event.unloadCache(); // remove events so they dont encroach on the next test
+		// destroy objects (and therefore their events) so they dont encroach on the next test
+		if( !Object.isUndefined(subjects.lv) ) subjects.lv.destroy();
+		if( !Object.isUndefined(subjects.lv2) ) subjects.lv2.destroy();
+		if( !Object.isUndefined(subjects.lv3) ) subjects.lv3.destroy();
+		if( !Object.isUndefined(subjects.lv4) ) subjects.lv4.destroy();
+		if( !Object.isUndefined(subjects.lv5) ) subjects.lv5.destroy();
+		if( !Object.isUndefined(subjects.ilv) ) subjects.ilv.destroy();
+		if( !Object.isUndefined(subjects.ilv2) ) subjects.ilv2.destroy();
     }},
     
     testValidatePresence: function() { with(this) {
@@ -655,127 +667,127 @@ function runTests(){
    
    testInstanciateLiveValidation: function(){ with(this){
         // test that a LiveValidation object can be set up 
-        assertEqual($('myText'), lv.element, "Expecting LiveValidation element to be myField0");
+        assertEqual($('myText'), subjects.lv.element, "Expecting LiveValidation element to be myField0");
         // test its default values
-        assertEqual('Thankyou!', lv.validMessage);
-        assertEqual($('myText'), lv.insertAfterWhatNode, "Expecting the node to insert the message after to be lv.element by default");
-        assertEqual('function', typeof lv.onValid);
-        assertEqual('function', typeof lv.onInvalid);
+        assertEqual('Thankyou!', subjects.lv.validMessage);
+        assertEqual($('myText'), subjects.lv.insertAfterWhatNode, "Expecting the node to insert the message after to be subjects.lv.element by default");
+        assertEqual('function', typeof subjects.lv.onValid);
+        assertEqual('function', typeof subjects.lv.onInvalid);
         //test overiding the defaults
-        lv = new LiveValidation('myText', {validMessage: 'Ta!', 
+        subjects.lv = new LiveValidation('myText', {validMessage: 'Ta!', 
                                                                 insertAfterWhatNode: $('myText').parentNode, 
                                                                 onValid: function(){ /*alert('i am valid');*/ },
                                                                 onInvalid: function(){ /*alert('i am not valid');*/ }
                                                                 });
-        assertEqual('Ta!', lv.validMessage);
-        assertEqual($('myText').parentNode, lv.insertAfterWhatNode, "Expecting the node to insert the message to have been overidden to be lv.element.parentNode");
-        assertEqual('function', typeof lv.onValid);
-        assertEqual('function', typeof lv.onInvalid);
+        assertEqual('Ta!', subjects.lv.validMessage);
+        assertEqual($('myText').parentNode, subjects.lv.insertAfterWhatNode, "Expecting the node to insert the message to have been overidden to be subjects.lv.element.parentNode");
+        assertEqual('function', typeof subjects.lv.onValid);
+        assertEqual('function', typeof subjects.lv.onInvalid);
     }},
     
     testadd: function(){ with(this){
         // test validations array is empty to start
-        assertEqual(0, lv.validations.length , "Length should be 0" );
+        assertEqual(0, subjects.lv.validations.length , "Length should be 0" );
         // add a validation
         var params = {failureMessage: 'Invalid!'};
-        lv.add(Validate.Presence, params);
+        subjects.lv.add(Validate.Presence, params);
         // tets it is held as an object
-        assertEqual('object', typeof lv.validations[0], "The validation should be stored of an object");
+        assertEqual('object', typeof subjects.lv.validations[0], "The validation should be stored of an object");
         // test that this has been passed into the validations array
-        assertEqual(1, lv.validations.length, "Length should be 1" );
+        assertEqual(1, subjects.lv.validations.length, "Length should be 1" );
         // test vthat it is holding the passd in validation correctly
-        assertEqual(Validate.Presence, lv.validations[0].type, "The validation type should be Validate.Presence");
-        assertEqual(params , lv.validations[0].params, "The validation params should be an object of parameters");
+        assertEqual(Validate.Presence, subjects.lv.validations[0].type, "The validation type should be Validate.Presence");
+        assertEqual(params , subjects.lv.validations[0].params, "The validation params should be an object of parameters");
     }},
     
     testGetElementType: function(){ with(this){
         // test it is  a text input
-        assertEqual(LiveValidation.TEXT, lv.getElementType('myText'));
+        assertEqual(LiveValidation.TEXT, subjects.lv.getElementType('myText'));
         // test it is  a textarea
-        lv = new LiveValidation('myTextarea');
-        assertEqual(LiveValidation.TEXTAREA, lv.getElementType('myTextarea'));
+        subjects.lv = new LiveValidation('myTextarea');
+        assertEqual(LiveValidation.TEXTAREA, subjects.lv.getElementType('myTextarea'));
         // test it is  a password input
-        lv = new LiveValidation('myPassword');
-        assertEqual(LiveValidation.PASSWORD, lv.getElementType('myPassword'));
+        subjects.lv = new LiveValidation('myPassword');
+        assertEqual(LiveValidation.PASSWORD, subjects.lv.getElementType('myPassword'));
         // test it is  a checkbox input
-        lv = new LiveValidation('myCheckbox');
-        assertEqual(LiveValidation.CHECKBOX, lv.getElementType('myCheckbox'));
+        subjects.lv = new LiveValidation('myCheckbox');
+        assertEqual(LiveValidation.CHECKBOX, subjects.lv.getElementType('myCheckbox'));
         // test it is  a select element
-        lv = new LiveValidation('mySelect');
-        assertEqual(LiveValidation.SELECT, lv.getElementType('mySelect'));
+        subjects.lv = new LiveValidation('mySelect');
+        assertEqual(LiveValidation.SELECT, subjects.lv.getElementType('mySelect'));
     }},
     
     testValidateElement: function(){ with(this){
-        lv.element.value = '';
-        lv.displayMessageWhenEmpty = true;
+        subjects.lv.element.value = '';
+        subjects.lv.displayMessageWhenEmpty = true;
         // test that if empty and should show the message when empty that it returns false and sets the message
-        assertEqual(false, lv.validateElement(Validate.Presence, {}), "Validation should return false as there is no content in required field");
-        assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
+        assertEqual(false, subjects.lv.validateElement(Validate.Presence, {}), "Validation should return false as there is no content in required field");
+        assertEqual("Can't be empty!", subjects.lv.message, "Message should be set to default Presence failure message");
         // test it returns true if should pass
-        lv.element.value = 'hello world';
-        assert(lv.validateElement(Validate.Presence, {}), "Validation should pass and return true");
+        subjects.lv.element.value = 'hello world';
+        assert(subjects.lv.validateElement(Validate.Presence, {}), "Validation should pass and return true");
         // test that it doesnt fail when empty if it should not display error for empty field (ie not Presence, Acceptance, Confirmation)
-        lv.element.value = '';
-        lv.displayMessageWhenEmpty = false;
-        assert(lv.validateElement(Validate.Format, { pattern: /hello/i}), "Validation should pass and return true for an empty field with Validate.Format only");
+        subjects.lv.element.value = '';
+        subjects.lv.displayMessageWhenEmpty = false;
+        assert(subjects.lv.validateElement(Validate.Format, { pattern: /hello/i}), "Validation should pass and return true for an empty field with Validate.Format only");
         // test that it will fail if should fail and has a value in the field
-        lv.element.value = 'howdy';
-        assertEqual(false, lv.validateElement(Validate.Format, { pattern: /hello/i}), "Validation should fail and return false for a non-empty field with an invalid value with Validate.Format only");
+        subjects.lv.element.value = 'howdy';
+        assertEqual(false, subjects.lv.validateElement(Validate.Format, { pattern: /hello/i}), "Validation should fail and return false for a non-empty field with an invalid value with Validate.Format only");
     }},
     
     testDoValidations: function(){ with(this){
-        lv.add(Validate.Presence);
+        subjects.lv.add(Validate.Presence);
         // test that it returns false if the validation should fail
-        assertEqual(false, !lv.doValidations(), "Should return false as this should fail");
-        assert(lv.displayMessageWhenEmpty, "lv.displayMessageWhenEmpty should be true for a presence validation");
+        assertEqual(false, !subjects.lv.doValidations(), "Should return false as this should fail");
+        assert(subjects.lv.displayMessageWhenEmpty, "subjects.lv.displayMessageWhenEmpty should be true for a presence validation");
         // test that it returns true if the validation should pass
-        lv.element.value = 'hello world';
-        assert(lv.doValidations(), "Should return true as this should pass");
+        subjects.lv.element.value = 'hello world';
+        assert(subjects.lv.doValidations(), "Should return true as this should pass");
         // test that stacked validations fail in precedence, (first one takes precedence etc)
-        lv.element.value = '';
-        lv.add(Validate.Format, { pattern: /hello/i });
-        lv.doValidations();
-        assertEqual("Can't be empty!" , lv.message, "Presence should fail first");
-        lv.element.value = 'howdy';
-        lv.doValidations();
-        assertEqual("Not valid!" , lv.message, "Format should fail second");
+        subjects.lv.element.value = '';
+        subjects.lv.add(Validate.Format, { pattern: /hello/i });
+        subjects.lv.doValidations();
+        assertEqual("Can't be empty!" , subjects.lv.message, "Presence should fail first");
+        subjects.lv.element.value = 'howdy';
+        subjects.lv.doValidations();
+        assertEqual("Not valid!" , subjects.lv.message, "Format should fail second");
         // test that displayMessageWhenEmpty is false for a format validation
-        assert(lv.displayMessageWhenEmpty, "lv.displayMessageWhenEmpty should be false for a format validation");
+        assert(subjects.lv.displayMessageWhenEmpty, "subjects.lv.displayMessageWhenEmpty should be false for a format validation");
         // tets that stacked validations can all be performed and return true if they all pass
-        lv.element.value = 'hello world';
-        assert(lv.doValidations(), "All validations should pass so should return true");
+        subjects.lv.element.value = 'hello world';
+        assert(subjects.lv.doValidations(), "All validations should pass so should return true");
     }},
     
     testValidate: function(){ with(this){
-        lv.add(Validate.Presence);
-        lv.add(Validate.Format, {pattern: /hello/i});
-        lv.add(Validate.Length, {minimum: 6});
+        subjects.lv.add(Validate.Presence);
+        subjects.lv.add(Validate.Format, {pattern: /hello/i});
+        subjects.lv.add(Validate.Length, {minimum: 6});
         // test that validating a stacked validation field passes and fails as expected
-        lv.element.value = '';
-        assertEqual(false, lv.validate(), "Validation should be false, failing on presence");
-        assertEqual("Can't be empty!", lv.message, "Should be default presence failureMessage");
-        lv.element.value = 'hey';
-        assertEqual(false, lv.validate(), "Validation should be false, failing on format");
-        assertEqual("Not valid!", lv.message, "Should be default format failureMessage");
-        lv.element.value = 'hello';
-        assertEqual(false, lv.validate(), "Validation should be false, failing on length");
-        assertEqual("Must not be less than 6 characters long!", lv.message, "Should be default minimum length failureMessage");
-        lv.element.value = 'hello world';
-        assert(lv.validate(), "Validation should be true, as all validations should pass now");
+        subjects.lv.element.value = '';
+        assertEqual(false, subjects.lv.validate(), "Validation should be false, failing on presence");
+        assertEqual("Can't be empty!", subjects.lv.message, "Should be default presence failureMessage");
+        subjects.lv.element.value = 'hey';
+        assertEqual(false, subjects.lv.validate(), "Validation should be false, failing on format");
+        assertEqual("Not valid!", subjects.lv.message, "Should be default format failureMessage");
+        subjects.lv.element.value = 'hello';
+        assertEqual(false, subjects.lv.validate(), "Validation should be false, failing on length");
+        assertEqual("Must not be less than 6 characters long!", subjects.lv.message, "Should be default minimum length failureMessage");
+        subjects.lv.element.value = 'hello world';
+        assert(subjects.lv.validate(), "Validation should be true, as all validations should pass now");
         // test that the default validMessage has been created in a span and appended after the field
-        assertEqual('SPAN', $(lv.element).next().nodeName, "A span should have been inserted after the field");
-        assertEqual('Thankyou!',$(lv.element).next().firstChild.nodeValue, "The span should contain a textnode with the default validMessage as its value in it");
+        assertEqual('SPAN', $(subjects.lv.element).next().nodeName, "A span should have been inserted after the field");
+        assertEqual('Thankyou!',$(subjects.lv.element).next().firstChild.nodeValue, "The span should contain a textnode with the default validMessage as its value in it");
         // test that can pass a different element to insert after and it will use that instead
-        lv = new LiveValidation('myText', {insertAfterWhatNode: $('myText').parentNode});
-        lv.add(Validate.Presence);
-        lv.element.value = '';
-        lv.validate();
+        subjects.lv = new LiveValidation('myText', {insertAfterWhatNode: $('myText').parentNode});
+        subjects.lv.add(Validate.Presence);
+        subjects.lv.element.value = '';
+        subjects.lv.validate();
         // should have span with default presence failureMessage after field's parentNode
         assertEqual('SPAN', $('myText').up().next().nodeName, "A span should have been inserted after the fields parentNode");
         assertEqual("Can't be empty!",$('myText').up().next().firstChild.nodeValue, "The span should  contain a textnode with the default presence failureMessage as its value in it");
         //test it replaces that with the valid message -  should have span with default validMessage after field's parentNode
-        lv.element.value = 'hello world';
-        lv.validate();
+        subjects.lv.element.value = 'hello world';
+        subjects.lv.validate();
         assertEqual('SPAN', $('myText').up().next().nodeName, "A span should have been inserted after the fields parentNode");
         assertEqual('Thankyou!',$('myText').up().next().firstChild.nodeValue, "The span should contain a textnode with the default validMessage as its value in it");
         $('myText').up().next().up().removeChild($('myText').up().next());
@@ -783,187 +795,187 @@ function runTests(){
         //var stripSpaces = function(value){ return value.strip(); }
         //clear any class names added by previous tests
         $('myText').className = '';
-        lv = new LiveValidation('myText');
-        lv.add(Validate.Numericality);
-        lv.element.value = '';
+        subjects.lv = new LiveValidation('myText');
+        subjects.lv.add(Validate.Numericality);
+        subjects.lv.element.value = '';
         //test that the class of the field is empty to start with
-        assertEqual('', stripSpaces($(lv.element).className), "The className should be empty");
+        assertEqual('', stripSpaces($(subjects.lv.element).className), "The className should be empty");
         //test that the class of the field has been set to the invalid one
-        lv.element.value = 'alec';
-        lv.validate();
-        assertEqual(lv.invalidFieldClass, stripSpaces($(lv.element).className), "The className of the field should be the default invalidFieldClass");
+        subjects.lv.element.value = 'alec';
+        subjects.lv.validate();
+        assertEqual(subjects.lv.invalidFieldClass, stripSpaces($(subjects.lv.element).className), "The className of the field should be the default invalidFieldClass");
          //test that the class of the field is still the invalid one but has not been duplicated
-        lv.element.value = 'live validation';
-        lv.validate();
-        assertEqual(lv.invalidFieldClass, stripSpaces($(lv.element).className), "The className of the field should be the default invalidFieldClass, but may have been duplicated");
+        subjects.lv.element.value = 'live validation';
+        subjects.lv.validate();
+        assertEqual(subjects.lv.invalidFieldClass, stripSpaces($(subjects.lv.element).className), "The className of the field should be the default invalidFieldClass, but may have been duplicated");
         //test that the class of the field has been set to the valid one
-        lv.element.value = '2';
-        lv.validate();
-        assertEqual(lv.validFieldClass, stripSpaces($(lv.element).className), "The className of the field should be the default validFieldClass");
+        subjects.lv.element.value = '2';
+        subjects.lv.validate();
+        assertEqual(subjects.lv.validFieldClass, stripSpaces($(subjects.lv.element).className), "The className of the field should be the default validFieldClass");
         //test that the class of the field is valid and not duplicated
-        lv.element.value = '20';
-        lv.validate();
-        assertEqual(lv.validFieldClass, stripSpaces($(lv.element).className), "The className of the field should be the default validFieldClass, but may have been duplicated");
+        subjects.lv.element.value = '20';
+        subjects.lv.validate();
+        assertEqual(subjects.lv.validFieldClass, stripSpaces($(subjects.lv.element).className), "The className of the field should be the default validFieldClass, but may have been duplicated");
         //test that the class of the field gets set back to empty if the validation type does not require to show valid state when empty
-        lv.element.value = '';
-        lv.validate();
-        assertEqual('', stripSpaces($(lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
+        subjects.lv.element.value = '';
+        subjects.lv.validate();
+        assertEqual('', stripSpaces($(subjects.lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
     }},
     
     testMassValidate: function(){ with(this){
-        lv.add(Validate.Presence);
-        lv2 = new LiveValidation('myTextarea');
-        lv2.add(Validate.Format, {pattern: /hello/i});
-        lv3 = new LiveValidation('myPassword');
-        lv3.add(Validate.Numericality);
-        lv4 = new LiveValidation('myCheckbox');
-        lv4.add(Validate.Acceptance);
-        lv5 = new LiveValidation('mySelect');
-        lv5.add(Validate.Inclusion, {within: ['Hello world', 'Howdy']});
-        var vs = [lv, lv2, lv3, lv4, lv5];
+        subjects.lv.add(Validate.Presence);
+        subjects.lv2 = new LiveValidation('myTextarea');
+        subjects.lv2.add(Validate.Format, {pattern: /hello/i});
+        subjects.lv3 = new LiveValidation('myPassword');
+        subjects.lv3.add(Validate.Numericality);
+        subjects.lv4 = new LiveValidation('myCheckbox');
+        subjects.lv4.add(Validate.Acceptance);
+        subjects.lv5 = new LiveValidation('mySelect');
+        subjects.lv5.add(Validate.Inclusion, {within: ['Hello world', 'Howdy']});
+        var vs = [subjects.lv, subjects.lv2, subjects.lv3, subjects.lv4, subjects.lv5];
         // test one by one that if all the others pass validation, and 1 should fail, that this causes the massValidate to return false
-        lv.element.value = '';
-        lv2.element.value = 'hello world';
-        lv3.element.value  = '3';
-        lv4.element.checked = true;
-        lv5.element.selectedIndex = 1;
-        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv has no value, and has presence validation");
-        lv.element.value = 'alec';
-        lv2.element.value = 'i am invalid';
-        lv3.element.value  = '3';
-        lv4.element.checked = true;
-        lv5.element.selectedIndex = 1;
-        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv2 has invalid value, and has format validation");
-        lv.element.value = 'alec';
-        lv2.element.value = 'hello world';
-        lv3.element.value  = 'foo';
-        lv4.element.checked = true;
-        lv5.element.selectedIndex = 1;
-        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv3 has non numeric value, and has numericality validation");
-        lv.element.value = 'alec';
-        lv2.element.value = 'hello world';
-        lv3.element.value  = '3';
-        lv4.element.checked = false;
-        lv5.element.selectedIndex = 1;
-        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv4 is not checked, and has acceptance validation");
-        lv.element.value = 'alec';
-        lv2.element.value = 'hello world';
-        lv3.element.value  = '3';
-        lv4.element.checked = true;
-        lv5.element.selectedIndex = 0;
-        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because lv5 has first option selected, which is not allowed by the inclusion validation");
+        subjects.lv.element.value = '';
+        subjects.lv2.element.value = 'hello world';
+        subjects.lv3.element.value  = '3';
+        subjects.lv4.element.checked = true;
+        subjects.lv5.element.selectedIndex = 1;
+        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because subjects.lv has no value, and has presence validation");
+        subjects.lv.element.value = 'alec';
+        subjects.lv2.element.value = 'i am invalid';
+        subjects.lv3.element.value  = '3';
+        subjects.lv4.element.checked = true;
+        subjects.lv5.element.selectedIndex = 1;
+        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because subjects.lv2 has invalid value, and has format validation");
+        subjects.lv.element.value = 'alec';
+        subjects.lv2.element.value = 'hello world';
+        subjects.lv3.element.value  = 'foo';
+        subjects.lv4.element.checked = true;
+        subjects.lv5.element.selectedIndex = 1;
+        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because subjects.lv3 has non numeric value, and has numericality validation");
+        subjects.lv.element.value = 'alec';
+        subjects.lv2.element.value = 'hello world';
+        subjects.lv3.element.value  = '3';
+        subjects.lv4.element.checked = false;
+        subjects.lv5.element.selectedIndex = 1;
+        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because subjects.lv4 is not checked, and has acceptance validation");
+        subjects.lv.element.value = 'alec';
+        subjects.lv2.element.value = 'hello world';
+        subjects.lv3.element.value  = '3';
+        subjects.lv4.element.checked = true;
+        subjects.lv5.element.selectedIndex = 0;
+        assertEqual(false, LiveValidation.massValidate(vs), "Should return false because subjects.lv5 has first option selected, which is not allowed by the inclusion validation");
         // test that it returns true when all fields are valid
-        lv.element.value = 'alec';
-        lv2.element.value = 'hello world';
-        lv3.element.value  = '3';
-        lv4.element.checked = true;
-        lv5.element.selectedIndex = 1;
+        subjects.lv.element.value = 'alec';
+        subjects.lv2.element.value = 'hello world';
+        subjects.lv3.element.value  = '3';
+        subjects.lv4.element.checked = true;
+        subjects.lv5.element.selectedIndex = 1;
         assert(LiveValidation.massValidate(vs), "Should return true because all fields are valid");
     }},
     
     testFocusedFlag: function(){ with(this){
-        lv.doOnFocus();
-        assertEqual(true, lv.focused);
-        lv.doOnBlur();
-        assertEqual(false, lv.focused);
+        subjects.lv.doOnFocus();
+        assertEqual(true, subjects.lv.focused);
+        subjects.lv.doOnBlur();
+        assertEqual(false, subjects.lv.focused);
     }},
     
     testRemovesMessageAndFieldClassOnFocus: function(){ with(this){
-        lv.add(Validate.Presence);
-        lv.element.value = '';
-        lv.validate();
-        assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
-        Event.simulateEvent(lv.element, 'focus');
-        assertEqual('', stripSpaces($(lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
-        assertEqual(undefined, $(lv.element).next(), "There should now be no span element after the field, as it should have been removed");
+        subjects.lv.add(Validate.Presence);
+        subjects.lv.element.value = '';
+        subjects.lv.validate();
+        assertEqual("Can't be empty!", subjects.lv.message, "Message should be set to default Presence failure message");
+        Event.simulateEvent(subjects.lv.element, 'focus');
+        assertEqual('', stripSpaces($(subjects.lv.element).className), "The className of the field should have been be emptied (as no class existed before)");
+        assertEqual(undefined, $(subjects.lv.element).next(), "There should now be no span element after the field, as it should have been removed");
     }},
     
     testOnlyOnBlur: function(){ with(this){
-        lv = new LiveValidation('myText', {onlyOnBlur: true});
-        lv.add(Validate.Presence);
-        Event.simulateEvent(lv.element, 'focus');
-        lv.element.value = '';
-        Event.simulateEvent(lv.element, 'blur');
-        assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message");
-        Event.simulateEvent(lv.element, 'focus');
-        lv.element.value = 'hello world';
-        Event.simulateEvent(lv.element, 'blur');
-        assertEqual("Thankyou!", lv.message, "Message should be set to default valid message");
+        subjects.lv = new LiveValidation('myText', {onlyOnBlur: true});
+        subjects.lv.add(Validate.Presence);
+        Event.simulateEvent(subjects.lv.element, 'focus');
+        subjects.lv.element.value = '';
+        Event.simulateEvent(subjects.lv.element, 'blur');
+        assertEqual("Can't be empty!", subjects.lv.message, "Message should be set to default Presence failure message");
+        Event.simulateEvent(subjects.lv.element, 'focus');
+        subjects.lv.element.value = 'hello world';
+        Event.simulateEvent(subjects.lv.element, 'blur');
+        assertEqual("Thankyou!", subjects.lv.message, "Message should be set to default valid message");
     }},
     
     testDeferValidation: function(){ with(this){
-        lv = new LiveValidation('myText', {wait: 1500});
-        lv.add(Validate.Presence);
-        lv.element.value = '';
-        lv.deferValidation();
-        assertEqual(undefined, lv.message, "Message should be undefined at this point, as wait time has not elapsed");
-        clearTimeout(lv.timeout);
+        subjects.lv = new LiveValidation('myText', {wait: 1500});
+        subjects.lv.add(Validate.Presence);
+        subjects.lv.element.value = '';
+        subjects.lv.deferValidation();
+        assertEqual(undefined, subjects.lv.message, "Message should be undefined at this point, as wait time has not elapsed");
+        clearTimeout(subjects.lv.timeout);
      }},
      
      testOnlyOnSubmit: function(){ with(this){
-         lv = new LiveValidation('myText', {onlyOnSubmit: true});
-         lv.add(Validate.Presence);
-         Event.simulateEvent(lv.element, 'focus');
-         lv.element.value = '';
-         Event.simulateEvent(lv.element, 'blur');
-         assertEqual(undefined, lv.message, "Message should be undefined at this point, as it should only be set when form is submitted");
-         Event.simulateEvent(lv.form, 'submit');
-         assertEqual("Can't be empty!", lv.message, "Message should be set to default Presence failure message now that the form has submitted");
+         subjects.lv = new LiveValidation('myText', {onlyOnSubmit: true});
+         subjects.lv.add(Validate.Presence);
+         Event.simulateEvent(subjects.lv.element, 'focus');
+         subjects.lv.element.value = '';
+         Event.simulateEvent(subjects.lv.element, 'blur');
+         assertEqual(undefined, subjects.lv.message, "Message should be undefined at this point, as it should only be set when form is submitted");
+         Event.simulateEvent(subjects.lv.form, 'submit');
+         assertEqual("Can't be empty!", subjects.lv.message, "Message should be set to default Presence failure message now that the form has submitted");
      }},
      
      testPreserveOldOnFocus: function(){ with(this){
-        Event.simulateEvent(lv.element, 'focus');
-        assertEqual(true, lv.element.focusCheck);     
+        Event.simulateEvent(subjects.lv.element, 'focus');
+        assertEqual(true, subjects.lv.element.focusCheck);     
      }},
      
      testPreserveOldOnBlur: function(){ with(this){
-        Event.simulateEvent(lv.element, 'blur');
-        assertEqual(true, lv.element.blurCheck);     
+        Event.simulateEvent(subjects.lv.element, 'blur');
+        assertEqual(true, subjects.lv.element.blurCheck);     
      }},
      
      testPreserveOldOnClick: function(){ with(this){
-        lv2 = new LiveValidation('myCheckbox');
-        Event.simulateMouseEvent(lv2.element, 'click');
-        assertEqual(true, lv2.element.clickCheck);     
+        subjects.lv2 = new LiveValidation('myCheckbox');
+        Event.simulateMouseEvent(subjects.lv2.element, 'click');
+        assertEqual(true, subjects.lv2.element.clickCheck);     
      }},
      
      testPreserveOldOnChange: function(){ with(this){
-        lv2 = new LiveValidation('mySelect');
-        Event.simulateEvent(lv2.element, 'change');
-        assertEqual(true, lv2.element.changeCheck);     
+        subjects.lv2 = new LiveValidation('mySelect');
+        Event.simulateEvent(subjects.lv2.element, 'change');
+        assertEqual(true, subjects.lv2.element.changeCheck);     
      }},
      
      testPreserveOldOnKeyup: function(){ with(this){
-        Event.simulateKeyEvent(lv.element, 'keyup');
-        assertEqual(true, lv.element.keyupCheck, {keyCode: 9});     
+        Event.simulateKeyEvent(subjects.lv.element, 'keyup');
+        assertEqual(true, subjects.lv.element.keyupCheck, {keyCode: 9});     
      }},
 	 
 	 testPreserveInlineOldOnFocus: function(){ with(this){
-        Event.simulateEvent(ilv.element, 'focus');
-        assertEqual(true, ilv.element.inlineFocusCheck);     
+        Event.simulateEvent(subjects.ilv.element, 'focus');
+        assertEqual(true, subjects.ilv.element.inlineFocusCheck);     
      }},
      
      testPreserveInlineOldOnBlur: function(){ with(this){
-        Event.simulateEvent(ilv.element, 'blur');
-        assertEqual(true, ilv.element.inlineBlurCheck);     
+        Event.simulateEvent(subjects.ilv.element, 'blur');
+        assertEqual(true, subjects.ilv.element.inlineBlurCheck);     
      }},
      
      testPreserveInlineOldOnClick: function(){ with(this){
-        ilv2 = new LiveValidation('myInlineCheckbox');
-        Event.simulateMouseEvent(ilv2.element, 'click');
-        assertEqual(true, ilv2.element.inlineClickCheck);     
+        subjects.ilv2 = new LiveValidation('myInlineCheckbox');
+        Event.simulateMouseEvent(subjects.ilv2.element, 'click');
+        assertEqual(true, subjects.ilv2.element.inlineClickCheck);     
      }},
      
      testPreserveInlineOldOnChange: function(){ with(this){
-        ilv2 = new LiveValidation('myInlineSelect');
-        Event.simulateEvent(ilv2.element, 'change');
-        assertEqual(true, ilv2.element.inlineChangeCheck);     
+        subjects.ilv2 = new LiveValidation('myInlineSelect');
+        Event.simulateEvent(subjects.ilv2.element, 'change');
+        assertEqual(true, subjects.ilv2.element.inlineChangeCheck);     
      }},
 	 
 	 testPreserveInlineOldOnKeyup: function(){ with(this){
-        Event.simulateKeyEvent(ilv.element, 'keyup');
-	   ilv.add(Validate.Presence);
-        assertEqual(true, ilv.element.inlineKeyupCheck, {keyCode: 9});     
+        Event.simulateKeyEvent(subjects.ilv.element, 'keyup');
+	   subjects.ilv.add(Validate.Presence);
+        assertEqual(true, subjects.ilv.element.inlineKeyupCheck, {keyCode: 9});     
      }},
     
      testLiveValidationFormIsInstantiated: function(){ with(this){
@@ -971,23 +983,23 @@ function runTests(){
      }},
 
      testLiveValidationFormIdGenerated: function(){ with(this){
-       ilv = new LiveValidation('myInlineText');
-       assertNotNull(ilv.form.id, "form should have a randomly generated id assigned to it");
-       assert(ilv.form.id.indexOf('.') == -1, "randomly generated id of form should not have a decimal point in it")
+       subjects.ilv = new LiveValidation('myInlineText');
+       assertNotNull(subjects.ilv.form.id, "form should have a randomly generated id assigned to it");
+       assert(subjects.ilv.form.id.indexOf('.') == -1, "randomly generated id of form should not have a decimal point in it")
      }},
     
      testLiveValidationFormPreserveOldOnSubmit: function(){ with(this){
        // add a validation rule so that form wont submit
-	   lv.add(Validate.Presence);
-       Event.simulateEvent(lv.form, 'submit');
-       assertEqual(true, lv.form.submitCheck);     
+	   subjects.lv.add(Validate.Presence);
+       Event.simulateEvent(subjects.lv.form, 'submit');
+       assertEqual(true, subjects.lv.form.submitCheck);     
      }},
     
      testLiveValidationFormPreserveInlineOldOnSubmit: function(){ with(this){
        // add a validation rule so that form wont submit
-	   ilv.add(Validate.Presence);
-       Event.simulateEvent(ilv.form, 'submit');
-       assertEqual(true, ilv.form.inlineSubmitCheck);     
+	   subjects.ilv.add(Validate.Presence);
+       Event.simulateEvent(subjects.ilv.form, 'submit');
+       assertEqual(true, subjects.ilv.form.inlineSubmitCheck);     
      }}
 
   }, "testlog");

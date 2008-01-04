@@ -382,7 +382,6 @@ LiveValidationForm.prototype = {
     this.fields = [];
     var self = this;
     // preserve the old onsubmit event
-    //var oldOnSubmit = this.element.onsubmit || function(){};
 	this.element.oldOnSubmit = this.element.onsubmit || function(){};
     this.element.onsubmit = function(e){
 	  var valid = LiveValidation.massValidate(self.fields);
