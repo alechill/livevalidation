@@ -30,6 +30,8 @@ var LiveValidation = function(element, optionsObj){
   	this.initialize(element, optionsObj);
 }
 
+LiveValidation.VERSION = '1.3 standalone',
+
 /** element types constants ****/
 
 LiveValidation.TEXTAREA 		= 1;
@@ -100,7 +102,7 @@ LiveValidation.prototype = {
       this.oldOnClick = this.element.onclick || function(){};
       this.oldOnChange = this.element.onchange || function(){};
       this.oldOnKeyup = this.element.onkeyup || function(){};
-    	this.element.onfocus = function(e){ self.doOnFocus(e); return self.oldOnFocus.call(this, e); }
+      this.element.onfocus = function(e){ self.doOnFocus(e); return self.oldOnFocus.call(this, e); }
       if(!this.onlyOnSubmit){
         switch(this.elementType){
           case LiveValidation.CHECKBOX:
@@ -114,6 +116,34 @@ LiveValidation.prototype = {
       	    this.element.onblur = function(e){ self.doOnBlur(e); return self.oldOnBlur.call(this, e); }
         }
       }
+    },
+	
+	/**
+     *	destroys the instance's events (restoring previous ones) and removes it from any LiveValidationForms
+     */
+    destroy: function(){
+  	  if(this.formObj){
+		// remove the field from the LiveValidationForm
+		this.formObj.removeField(this);
+		// destroy the LiveValidationForm if no LiveValidation fields left in it
+		this.formObj.destroy();
+	  }
+      // remove events - set them back to the previous events
+	  this.element.onfocus = this.oldOnFocus;
+      if(!this.onlyOnSubmit){
+        switch(this.elementType){
+          case LiveValidation.CHECKBOX:
+            this.element.onclick = this.oldOnClick;
+          // let it run into the next to add a change event too
+          case LiveValidation.SELECT:
+            this.element.onchange = this.oldOnChange;
+            break;
+          default:
+            if(!this.onlyOnBlur) this.element.onkeyup = this.oldOnKeyup;
+      	    this.element.onblur = this.oldOnBlur;
+        }
+      }
+	  // @todo - remove message and field class
     },
     
     /**
@@ -359,6 +389,11 @@ var LiveValidationForm = function(element){
 }
 
 /**
+ * namespace to hold instances
+ */
+LiveValidationForm.instances = {};
+
+/**
    *	gets the instance of the LiveValidationForm if it has already been made or creates it if it doesnt exist
    *	
    *	@var element {HTMLFormElement} - a dom element reference to a form
@@ -366,8 +401,8 @@ var LiveValidationForm = function(element){
 LiveValidationForm.getInstance = function(element){
   var rand = Math.random() * Math.random();
   if(!element.id) element.id = 'formId_' + rand.toString().replace(/\./, '') + new Date().valueOf();
-  if(!window['LiveValidationForm_' + element.id]) window['LiveValidationForm_' + element.id] = new LiveValidationForm(element);
-  return window['LiveValidationForm_' + element.id];
+  if(!LiveValidationForm.instances[element.id]) LiveValidationForm.instances[element.id] = new LiveValidationForm(element);
+  return LiveValidationForm.instances[element.id];
 }
 
 LiveValidationForm.prototype = {
@@ -378,14 +413,15 @@ LiveValidationForm.prototype = {
    *	@var element {HTMLFormElement} - a dom element reference to the form to turn into a LiveValidationForm
    */
   initialize: function(element){
+  	this.name = element.id;
     this.element = element;
     this.fields = [];
-    var self = this;
     // preserve the old onsubmit event
-	this.element.oldOnSubmit = this.element.onsubmit || function(){};
+	this.oldOnSubmit = this.element.onsubmit || function(){};
+    var self = this;
     this.element.onsubmit = function(e){
 	  var valid = LiveValidation.massValidate(self.fields);
-      var old = this.oldOnSubmit(e) !== false;
+      var old = self.oldOnSubmit.call(this, e) !== false;
       return (valid && old);     
     }
   },
@@ -397,6 +433,34 @@ LiveValidationForm.prototype = {
    */
   addField: function(newField){
     this.fields.push(newField);
+  },
+  
+  /**
+   *	removes a LiveValidation field from the forms fields array
+   *	
+   *	@var victim {LiveValidation} - a LiveValidation object
+   */
+  removeField: function(victim){
+  	var victimless = [];
+  	for( var i = 0, len = this.fields.length; i < len; i++){
+		if(this.fields[i] !== victim) victimless.push(this.fields[i]);
+	}
+    this.fields = victimless;
+  },
+  
+  /**
+   *	destroy this instance and its events
+   *
+   * @ return {Boolean} - whether it was destroyed or not
+   */
+  destroy: function(){
+  	// only destroy if has no fields associated with it
+  	if (this.fields.length != 0) return false;
+	// remove events - set back to previous events
+	this.element.onsubmit = this.oldOnSubmit;
+	// remove from the instances namespace
+	LiveValidationForm.instances[this.name] = null;
+	return true;
   }
    
 }// end of LiveValidationForm prototype
