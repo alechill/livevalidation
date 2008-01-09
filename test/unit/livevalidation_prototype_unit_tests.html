@@ -33,11 +33,10 @@
   <!-- Log output -->
   <div id="testlog"> </div>
   
-  <!-- field for testing Validate.Confirmation -->
-  <input id="matchField" type="hidden" value="hello world"/>
-  
-  <!-- fields for general testing -->
-  <form action="#" id="myForm">
+  <!-- fileds for general testing -->
+  <form action="livevalidation_unit_tests_submit_to_me.html" id="myForm">
+  	<!-- field for testing Validate.Confirmation -->
+  	<input id="matchField" type="hidden" value="hello world"/>
   	<p><input id="myText" type="text" value=""/></p>
     <p><input id="myPassword" type="password" value=""/></p>
   	<p><textarea id="myTextarea"></textarea></p>
@@ -52,7 +51,7 @@
   </form>
   
   <!-- fields for inline event testing -->
-  <form action="#" onsubmit="this.inlineSubmitCheck = true;">
+  <form action="livevalidation_unit_tests_submit_to_me.html" onsubmit="this.submitType = 'old'; this.inlineSubmitCheck = true; return false;">
   	<p><input id="myInlineText" type="text" value="" onfocus="this.inlineFocusCheck = true;" onblur="this.inlineBlurCheck = true;" onkeyup="this.inlineKeyupCheck = true;"/></p>
     <p><input id="myInlineCheckbox" type="checkbox" value="accept me" onclick="this.inlineClickCheck = true;"/></p>
     <p>

@@ -347,7 +347,7 @@ form submitting.</p>
 submitted. This is demonstrated in the following example.</p>
 		<p>Note also that the email field has no validation that it is present, therefore if this is not filled in the form
 will still be valid, as it will be treated as an optional field.</p>
-		<form action="#" method="post">
+		<form action="livevalidation_functional_tests_submit_to_me.html" method="post" onsubmit="alert('This is the old onsubmit event');">
 			<fieldset>
 			  <legend>Example of form validation</legend>
 				<p><label for="field1">Email:</label><br /><input type="text" id="field1" /></p>

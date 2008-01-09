@@ -6,6 +6,8 @@
 
 // <![CDATA[
 
+alert('LiveValidation standalone version unit tests');
+
 // utility functions /////////////////////////////////////
 
 // strip spaces from the beginning and end of a value
@@ -137,15 +139,15 @@ function runTests(){
         formEl.onsubmit = function(){ this.submitCheck = true; return false; }
 		// preset inline check values
 		var iEl = $('myInlineText');
-        iEl.focusCheck = false;
-        iEl.blurCheck = false;
-        iEl.keyupCheck = false;
+        iEl.inlineFocusCheck = false;
+        iEl.inlineBlurCheck = false;
+        iEl.inlineKeyupCheck = false;
         var iChkEl = $('myInlineCheckbox');
-        iChkEl.clickCheck = false;
+        iChkEl.inlineClickCheck = false;
         var iSelectEl = $('myInlineSelect');
-        iSelectEl.changeCheck = false;
+        iSelectEl.inlineChangeCheck = false;
         var iFormEl = $$('form')[1];
-        iFormEl.submitCheck = false;
+        iFormEl.inlineSubmitCheck = false;
         // make the first LiveValidation object and first inline events one and define others
 		// scoped on an object
 		subjects = {};
@@ -1004,14 +1006,14 @@ function runTests(){
        // add a validation rule so that form wont submit
 	   subjects.lv.add(Validate.Presence);
        Event.simulateEvent(subjects.lv.form, 'submit');
-       assertEqual(true, subjects.lv.form.submitCheck);     
+       assertEqual(false, subjects.lv.form.submitCheck);     
      }},
     
      testLiveValidationFormPreserveInlineOldOnSubmit: function(){ with(this){
        // add a validation rule so that form wont submit
 	   subjects.ilv.add(Validate.Presence);
        Event.simulateEvent(subjects.ilv.form, 'submit');
-       assertEqual(true, subjects.ilv.form.inlineSubmitCheck);     
+       assertEqual(false, subjects.ilv.form.inlineSubmitCheck);     
      }},
 	 
 	 testRemoveFromFieldsLiveValidationFormOnDestroy: function() { with(this) {
@@ -2120,14 +2122,22 @@ function runTests(){
        // add a validation rule so that form wont submit
 	   subjects.lv.add(Validate.Presence);
        Event.simulateEvent(subjects.lv.form, 'submit');
-       assertEqual(true, subjects.lv.form.submitCheck);     
-     }},
+       assertEqual(false, subjects.lv.form.submitCheck, 'Should be false because old was not run as not valid');     
+      
+	   subjects.lv.element.value = 'i am valid';
+       Event.simulateEvent(subjects.lv.form, 'submit');
+       assertEqual(true, subjects.lv.form.submitCheck, 'Should be true because old was should have run as it is now valid');     
+	 }},
     
      testLiveValidationFormPreserveInlineOldOnSubmit: function(){ with(this){
        // add a validation rule so that form wont submit
 	   subjects.ilv.add(Validate.Presence);
        Event.simulateEvent(subjects.ilv.form, 'submit');
-       assertEqual(true, subjects.ilv.form.inlineSubmitCheck);     
+       assertEqual(false, subjects.ilv.form.inlineSubmitCheck);  
+	   
+	   subjects.lv.element.value = 'i am valid';
+       Event.simulateEvent(subjects.lv.form, 'submit');
+       assertEqual(true, subjects.lv.form.submitCheck, 'Should be true because old was should have run as it is now valid');     
      }},
 	 
 	 testRemoveFromFieldsLiveValidationFormOnDestroy: function() { with(this) {

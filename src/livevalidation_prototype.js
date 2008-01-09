@@ -87,7 +87,8 @@ LiveValidation.prototype = {
       wait: 0,
       onlyOnSubmit: false
     }, optionsObj || {});
-    this.options.insertAfterWhatNode = $(this.options.insertAfterWhatNode);
+	var node = this.options.insertAfterWhatNode || this.element;
+    this.options.insertAfterWhatNode = node.nodeType ? node :  $(node);
     Object.extend(this, this.options); // copy the options to the actual object
     // add to form if it has been provided
     if(this.form){
@@ -400,20 +401,14 @@ LiveValidationForm.prototype = {
     this.element = $(element);
     this.fields = [];
     // need to capture onsubmit in this way rather than Event.observe because Rails helpers add events inline
-	// and must ensure that the validation is run before any previous submit events
-	/*this.element.oldOnSubmit = this.element.onsubmit || function(){};
-    this.element.onsubmit = function(e){
-	  var valid = LiveValidation.massValidate(this.fields);
-      var old = this.element.oldOnSubmit(e) !== false;
-      return (valid && old);     
-    }.bindAsEventListener(this);*/
-	// @todo - check that this is fired before an inline submit event or will allow form to submit via ajax before the validation is run - ala rails helpers
-	// otherwise use the above commented way
-	this.boundSubmit = function(e){
-		//alert('hello');
-	  return LiveValidation.massValidate(this.fields);    
+	// and must ensure that the validation is run before any previous submit events 
+	//(hence not using Event.observe, as inline events appear to be captured before prototype events)
+	this.oldOnSubmit = this.element.onsubmit || function(){};
+	this.element.onsubmit = function(e){
+		alert('submitted')
+      var ret = (LiveValidation.massValidate(this.fields)) ? this.oldOnSubmit.call(this.element, e) !== false : false;
+	  if(!ret) Event.stop(e );	
     }.bindAsEventListener(this);
-	Event.observe(this.element, 'submit', this.boundSubmit);
   },
   
   /**
@@ -441,7 +436,7 @@ LiveValidationForm.prototype = {
   	// only destroy if has no fields
   	if (this.fields.length != 0) return false;
 	// remove events
-	Event.stopObserving(this.element, 'focus', this.boundSubmit);
+	this.element.onsubmit = this.oldOnSubmit;
 	// remove from the instances namespace
 	LiveValidationForm.instances[this.name] = null;
 	return true;

@@ -84,7 +84,8 @@ LiveValidation.prototype = {
       // options
     	var options = optionsObj || {};
     	this.validMessage = options.validMessage || 'Thankyou!';
-    	this.insertAfterWhatNode = options.insertAfterWhatNode || this.element;
+    	var node = options.insertAfterWhatNode || this.element;
+		this.insertAfterWhatNode = node.nodeType ? node : document.getElementById(node);
       this.onValid = options.onValid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };
       this.onInvalid = options.onInvalid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };	
     	this.onlyOnBlur =  options.onlyOnBlur || false;
@@ -420,9 +421,7 @@ LiveValidationForm.prototype = {
 	this.oldOnSubmit = this.element.onsubmit || function(){};
     var self = this;
     this.element.onsubmit = function(e){
-	  var valid = LiveValidation.massValidate(self.fields);
-      var old = self.oldOnSubmit.call(this, e) !== false;
-      return (valid && old);     
+      return (LiveValidation.massValidate(self.fields)) ? self.oldOnSubmit.call(this, e || window.event) !== false : false;
     }
   },
   
