@@ -450,11 +450,11 @@ LiveValidationForm.prototype = {
   /**
    *	destroy this instance and its events
    *
-   * @ return {Boolean} - whether it was destroyed or not
+   * @var force {Boolean} - whether to force the detruction even if there are fields still associated
    */
-  destroy: function(){
-  	// only destroy if has no fields associated with it
-  	if (this.fields.length != 0) return false;
+  destroy: function(force){
+  	// only destroy if has no fields and not being forced
+  	if (this.fields.length != 0 && !force) return false;
 	// remove events - set back to previous events
 	this.element.onsubmit = this.oldOnSubmit;
 	// remove from the instances namespace

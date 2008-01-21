@@ -405,9 +405,8 @@ LiveValidationForm.prototype = {
 	//(hence not using Event.observe, as inline events appear to be captured before prototype events)
 	this.oldOnSubmit = this.element.onsubmit || function(){};
 	this.element.onsubmit = function(e){
-		alert('submitted')
-      var ret = (LiveValidation.massValidate(this.fields)) ? this.oldOnSubmit.call(this.element, e) !== false : false;
-	  if(!ret) Event.stop(e );	
+	  var ret = (LiveValidation.massValidate(this.fields)) ? this.oldOnSubmit.call(this.element, e) !== false : false;
+	  if (!ret) Event.stop(e)
     }.bindAsEventListener(this);
   },
   
@@ -431,14 +430,16 @@ LiveValidationForm.prototype = {
   
   /**
    *	destroy this instance and its events
+   *
+   * @var force {Boolean} - whether to force the detruction even if there are fields still associated
    */
-  destroy: function(){
-  	// only destroy if has no fields
-  	if (this.fields.length != 0) return false;
+  destroy: function(force){
+  	// only destroy if has no fields and not being forced
+  	if (this.fields.length != 0 && !force) return false;
 	// remove events
 	this.element.onsubmit = this.oldOnSubmit;
 	// remove from the instances namespace
-	LiveValidationForm.instances[this.name] = null;
+	LiveValidationForm.instances[this.element.id] = null;
 	return true;
   }
    
