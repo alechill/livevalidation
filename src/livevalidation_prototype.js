@@ -145,7 +145,7 @@ LiveValidation.prototype = {
           Event.stopObserving(this.element, 'blur', this.boundBlur);
       }
     }
-	// @todo - remove message and field class
+	this.removeMessageAndFieldClass();
   },
   
   /**
@@ -172,15 +172,15 @@ LiveValidation.prototype = {
   /**
    * sets the focused flag to false when field loses focus 
    */
-  doOnBlur: function(e){
+  doOnBlur: function(){
     this.focused = false;
-    this.validate(e);
+    this.validate();
   },
     
   /**
-   * sets the focused flag to true when field gains focus 
+   * sets the focused flag to true when field gains focus and removes old message and field class 
    */
-  doOnFocus: function(e){
+  doOnFocus: function(){
     this.focused = true;
     this.removeMessageAndFieldClass();
   },
@@ -275,14 +275,37 @@ LiveValidation.prototype = {
    * @return {Boolean} - whether the all the validations passed or if one failed
    */
   validate: function(){
-    var isValid = this.doValidations();
-    if(isValid){
-      this.onValid();
-      return true;
-    }else{
-      this.onInvalid();
-      return false;
-    }
+  	if(!this.element.disabled){
+		var isValid = this.doValidations();
+		if(isValid){
+			this.onValid();
+			return true;
+		}else {
+			this.onInvalid();
+			return false;
+		}
+	}
+  },
+  
+  /**
+   *	enables the field
+   *
+   * @return {Boolean} - whether the all the validations passed or if one failed
+   */
+  enable: function(){
+  	this.element.disabled = false;
+	return this;
+  },
+  
+  /**
+   *	disables the field and removes any message and stylesassociated with the field
+   *
+   * @return {Boolean} - whether the all the validations passed or if one failed
+   */
+  disable: function(){
+  	this.element.disabled = true;
+	this.removeMessageAndFieldClass();
+	return this;
   },
     
   /** Message insertion methods ****************************

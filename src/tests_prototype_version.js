@@ -120,6 +120,8 @@ function runTests(){
     setup: function() { with(this) {
         // set up some pre defined events to check they are preserved
         var el = $('myText');
+		el.value = '';
+		el.disabled = false;
         el.focusCheck = false;
         el.onfocus = function(){ this.focusCheck = true; }
         el.blurCheck = false;
@@ -137,6 +139,7 @@ function runTests(){
         formEl.onsubmit = function(){ this.submitCheck = true; return false; }
 		// preset inline check values
 		var iEl = $('myInlineText');
+		iEl.disabled = false;
         iEl.inlineFocusCheck = false;
         iEl.inlineBlurCheck = false;
         iEl.inlineKeyupCheck = false;
@@ -684,7 +687,7 @@ function runTests(){
     /*********************** LiveValidation *****************************/
    
    testInstanciateLiveValidation: function(){ with(this){
-        // test that a LiveValidation object can be set up 
+        // test that a LiveValidation object has  been set up 
         assertEqual($('myText'), subjects.lv.element, "Expecting LiveValidation element to be myField0");
         // test its default values
         assertEqual('Thankyou!', subjects.lv.validMessage);
@@ -704,7 +707,7 @@ function runTests(){
         assertEqual('function', typeof subjects.lv.onInvalid);
     }},
     
-    testadd: function(){ with(this){
+    testAdd: function(){ with(this){
         // test validations array is empty to start
         assertEqual(0, subjects.lv.validations.length , "Length should be 0" );
         // add a validation
@@ -723,19 +726,19 @@ function runTests(){
         // test it is  a text input
         assertEqual(LiveValidation.TEXT, subjects.lv.getElementType('myText'));
         // test it is  a textarea
-		subjects.lv.destroy(); //destroy previous to remove events
+		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('myTextarea');
         assertEqual(LiveValidation.TEXTAREA, subjects.lv.getElementType('myTextarea'));
         // test it is  a password input
-		subjects.lv.destroy(); //destroy previous to remove events
+		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('myPassword');
         assertEqual(LiveValidation.PASSWORD, subjects.lv.getElementType('myPassword'));
         // test it is  a checkbox input
-		subjects.lv.destroy(); //destroy previous to remove events
+		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('myCheckbox');
         assertEqual(LiveValidation.CHECKBOX, subjects.lv.getElementType('myCheckbox'));
         // test it is  a select element
-		subjects.lv.destroy(); //destroy previous to remove events
+		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('mySelect');
         assertEqual(LiveValidation.SELECT, subjects.lv.getElementType('mySelect'));
     }},
@@ -761,7 +764,7 @@ function runTests(){
     testDoValidations: function(){ with(this){
         subjects.lv.add(Validate.Presence);
         // test that it returns false if the validation should fail
-        assertEqual(false, !subjects.lv.doValidations(), "Should return false as this should fail");
+        assertEqual(false, subjects.lv.doValidations(), "Should return false as this should fail");
         assert(subjects.lv.displayMessageWhenEmpty, "subjects.lv.displayMessageWhenEmpty should be true for a presence validation");
         // test that it returns true if the validation should pass
         subjects.lv.element.value = 'hello world';
@@ -916,7 +919,7 @@ function runTests(){
     }},
     
     testOnlyOnBlur: function(){ with(this){
-		subjects.lv.destroy(); //destroy previous to remove events
+		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('myText', {onlyOnBlur: true});
         subjects.lv.add(Validate.Presence);
         Event.simulateEvent(subjects.lv.element, 'focus');
@@ -930,7 +933,7 @@ function runTests(){
     }},
     
     testDeferValidation: function(){ with(this){
-		subjects.lv.destroy(); //destroy previous to remove events
+		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('myText', {wait: 1500});
         subjects.lv.add(Validate.Presence);
         subjects.lv.element.value = '';
@@ -940,7 +943,7 @@ function runTests(){
      }},
      
      testOnlyOnSubmit: function(){ with(this){
-	 	 subjects.lv.destroy(); //destroy previous to remove events
+	 	 subjects.lv.destroy(); //destroy previous to remove events etc.
 		 subjects.lv = new LiveValidation('myText', {onlyOnSubmit: true});
 		 subjects.lv.add(Validate.Presence);
          Event.simulateEvent(subjects.lv.element, 'focus');
@@ -950,6 +953,18 @@ function runTests(){
          Event.simulateEvent(subjects.lv.form, 'submit');
 		 assertEqual("Can't be empty!", subjects.lv.message, "Message should be set to default Presence failure message now that the form has submitted");
      }},
+	 
+	testEnableDisable: function(){ with(this){
+        subjects.lv.add(Validate.Presence);
+        subjects.lv.element.value = '';
+        subjects.lv.disable();
+		subjects.lv.element.value = 'Woooo';
+		subjects.lv.validate();
+        assertEqual(undefined, subjects.lv.message, "Message should still be undefined, as the validation should not have run again as disabled");
+		subjects.lv.enable();
+        subjects.lv.validate();
+        assertEqual("Thankyou!", subjects.lv.message, "Message should be set to default valid message, as validation has been run and valid");
+    }},
      
      testPreserveOldOnFocus: function(){ with(this){
         Event.simulateEvent(subjects.lv.element, 'focus');
@@ -1032,7 +1047,7 @@ function runTests(){
 	   subjects.ilv.add(Validate.Presence);
 	   
        Event.simulateEvent(subjects.ilv.form, 'submit');
-       assertEqual(false, subjects.ilv.form.inlineSubmitCheck, 'Should be false because old was not run as not valid');  
+       assertEqual(false, subjects.ilv.form.inlineSubmitCheck, 'Should be false because old should not run as not valid');  
 	   subjects.ilv.element.value = 'i am valid';
        Event.simulateEvent(subjects.ilv.form, 'submit');
        assertEqual(true, subjects.ilv.form.inlineSubmitCheck, 'Should be true because old onsubmit should have run as it is now valid');     
