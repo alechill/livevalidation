@@ -30,7 +30,7 @@ var LiveValidation = function(element, optionsObj){
   	this.initialize(element, optionsObj);
 }
 
-LiveValidation.VERSION = '1.3 standalone',
+LiveValidation.VERSION = '1.3 standalone';
 
 /** element types constants ****/
 

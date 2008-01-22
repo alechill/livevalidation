@@ -88,7 +88,7 @@ LiveValidation.prototype = {
       onlyOnSubmit: false
     }, optionsObj || {});
 	var node = this.options.insertAfterWhatNode || this.element;
-    this.options.insertAfterWhatNode = node.nodeType ? node :  $(node);
+    this.options.insertAfterWhatNode = $(node);
     Object.extend(this, this.options); // copy the options to the actual object
     // add to form if it has been provided
     if(this.form){
@@ -325,7 +325,7 @@ LiveValidation.prototype = {
   /**
    *	changes the class of the field based on whether it is valid or not
    */
-  addFieldClass: function(){
+  addFieldClass: function(){ 
     this.removeFieldClass();
     if(!this.validationFailed){
       if(this.displayMessageWhenEmpty || this.element.value != ''){
