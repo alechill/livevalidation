@@ -288,9 +288,9 @@ LiveValidation.prototype = {
   },
   
   /**
-   *	enables the field
+   *  enables the field
    *
-   * @return {Boolean} - whether the all the validations passed or if one failed
+   *  @return {LiveValidation} - the LiveValidation object for chaining
    */
   enable: function(){
   	this.element.disabled = false;
@@ -298,9 +298,9 @@ LiveValidation.prototype = {
   },
   
   /**
-   *	disables the field and removes any message and stylesassociated with the field
+   *  disables the field and removes any message and styles associated with the field
    *
-   * @return {Boolean} - whether the all the validations passed or if one failed
+   *  @return {LiveValidation} - the LiveValidation object for chaining
    */
   disable: function(){
   	this.element.disabled = true;

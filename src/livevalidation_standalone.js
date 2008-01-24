@@ -113,7 +113,7 @@ LiveValidation.prototype = {
             this.element.onchange = function(e){ self.validate(); return self.oldOnChange.call(this, e); }
             break;
           default:
-            if(!this.onlyOnBlur) this.element.onkeyup = function(e){;self.deferValidation(); return self.oldOnKeyup.call(this, e); }
+            if(!this.onlyOnBlur) this.element.onkeyup = function(e){ self.deferValidation(); return self.oldOnKeyup.call(this, e); }
       	    this.element.onblur = function(e){ self.doOnBlur(e); return self.oldOnBlur.call(this, e); }
         }
       }
@@ -144,7 +144,7 @@ LiveValidation.prototype = {
       	    this.element.onblur = this.oldOnBlur;
         }
       }
-	  // @todo - remove message and field class
+	  this.removeMessageAndFieldClass();
     },
     
     /**
@@ -275,15 +275,38 @@ LiveValidation.prototype = {
      * @return {Boolean} - whether the all the validations passed or if one failed
      */
     validate: function(){
-      var isValid = this.doValidations();
-    	if(isValid){
-    		this.onValid();
-    		return true;
-    	}else{
-    	  	this.onInvalid();
-    	  	return false;
-    	}
+      if(!this.element.disabled){
+		var isValid = this.doValidations();
+		if(isValid){
+			this.onValid();
+			return true;
+		}else {
+			this.onInvalid();
+			return false;
+		}
+	  }
     },
+	
+ /**
+   *  enables the field
+   *
+   *  @return {LiveValidation} - the LiveValidation object for chaining
+   */
+  enable: function(){
+  	this.element.disabled = false;
+	return this;
+  },
+  
+  /**
+   *  disables the field and removes any message and styles associated with the field
+   *
+   *  @return {LiveValidation} - the LiveValidation object for chaining
+   */
+  disable: function(){
+  	this.element.disabled = true;
+	this.removeMessageAndFieldClass();
+	return this;
+  },
     
     /** Message insertion methods ****************************
      * 
