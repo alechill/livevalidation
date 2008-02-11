@@ -23,8 +23,8 @@ Whichever route you choose, you should add the javascript files to a
 directory of your website, usually something like /javascripts.
 
 Then you must include the javascript in the head of the web page document 
-that you wish to perform validation in. Here is an example of how to do for
-each version, paste this into the head:
+that you wish to perform validation in. Here is an example of how to do it 
+for each version, paste this into the head:
 
 For standalone version:
 -----------------------

@@ -43,7 +43,8 @@ var myLiveValidationCallback = function(){
 		 <p>Enter the field then click somewhere else: 
 		   <input type="text" id="f1" />
 		   <script type="text/javascript">
-		      new LiveValidation('f1',  {onValid: myLiveValidationCallback, onInvalid: myLiveValidationCallback} ).add(Validate.Presence, { failureMessage: 'I <em>am</em> HTML!' });
+		     var f1 = new LiveValidation('f1');
+		     f1.add(Validate.Presence);
 		   </script>  
 		 </p>
   </div>
@@ -367,7 +368,7 @@ will still be valid, as it will be treated as an optional field.</p>
 		</form>
     <script type="text/javascript">
 			var field1 = new LiveValidation( 'field1', {onlyOnSubmit: true } );
-			field1.add(Validate.Format, { pattern: /\d{7,8}-[\d|K|k]/g });
+			field1.add( Validate.Email );
 			var field2 = new LiveValidation( 'field2', {onlyOnSubmit: true } );
 			field2.add( Validate.Acceptance );
 			var field3 = new LiveValidation( 'field3', {onlyOnSubmit: true } );
@@ -410,7 +411,8 @@ it will still be validated without having to leave the field.</p>
 		</form>
     <script type="text/javascript">
 			var f24 = new LiveValidation( 'f24', {onlyOnSubmit: true } );
-      f24.add(Validate.Format, { pattern: /\d{7,8}-[\d|K|k]/g });
+      f24.add( Validate.Presence );
+			f24.add( Validate.Length, {minimum: 10} );
 	  </script> 
 	</div>
   

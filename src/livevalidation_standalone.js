@@ -1,5 +1,5 @@
 // LiveValidation 1.3 (standalone version)
-// Copyright (c) 2007 Alec Hill (www.livevalidation.com)
+// Copyright (c) 2007-2008 Alec Hill (www.livevalidation.com)
 // LiveValidation is licensed under the terms of the MIT License
 
 /*********************************************** LiveValidation class ***********************************/

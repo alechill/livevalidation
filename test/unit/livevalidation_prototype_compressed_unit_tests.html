@@ -33,11 +33,10 @@
   <!-- Log output -->
   <div id="testlog"> </div>
   
-  <!-- field for testing Validate.Confirmation -->
-  <input id="matchField" type="hidden" value="hello world"/>
-  
-  <!-- fileds for general testing -->
-  <form action="#" id="myForm">
+  <!-- fields for general testing -->
+  <form action="livevalidation_unit_tests_submit_to_me.html" id="myForm" enctype="multipart/form-data">
+  	<!-- field for testing Validate.Confirmation -->
+  	<input id="matchField" type="hidden" value="hello world"/>
   	<p><input id="myText" type="text" value=""/></p>
     <p><input id="myPassword" type="password" value=""/></p>
   	<p><textarea id="myTextarea"></textarea></p>
@@ -49,6 +48,21 @@
          <option value="Howdy">Howdy</option>
       </select>
     </p>
+    <p><input id="myFile" type="file" value=""/></p>
+  </form>
+  
+  <!-- fields for inline event testing -->
+  <form action="livevalidation_unit_tests_submit_to_me.html" onsubmit="this.submitType = 'old'; this.inlineSubmitCheck = true; return false;" enctype="multipart/form-data">
+  	<p><input id="myInlineText" type="text" value="" onfocus="this.inlineFocusCheck = true;" onblur="this.inlineBlurCheck = true;" onkeyup="this.inlineKeyupCheck = true;"/></p>
+    <p><input id="myInlineCheckbox" type="checkbox" value="accept me" onclick="this.inlineClickCheck = true;"/></p>
+    <p>
+      <select id="myInlineSelect" onchange="this.inlineChangeCheck = true;">
+         <option value="Please select...">Please select...</option>
+         <option value="Hello world">Hello world</option>
+         <option value="Howdy">Howdy</option>
+      </select>
+    </p>
+    <p><input id="myInlineFile" type="file" value=""  onchange="this.inlineChangeCheck = true;"/></p>
   </form>
   
 </body>
