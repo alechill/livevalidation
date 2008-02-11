@@ -459,6 +459,16 @@ it will still be validated without having to leave the field.</p>
 		    f29.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
 		  </script>  
 	  </p>
+    <h4>File input element</h4>
+		<p>This example will check that the value is filled in.</p>
+		<p>Must be filled in: 
+      <br/>
+		  <input type="file" id="f30" value="" class="extra_large"/>
+			<script type="text/javascript">
+		    var f30 = new LiveValidation('f30');
+		    f30.add(Validate.Presence);
+		  </script>  
+	  </p>
   </div>
 
 </body>

@@ -17,6 +17,19 @@
     input.submit { color: #666666; }
   </style>
   
+  <script type="text/javascript">
+    var createHtmlMessageDiv = function(scope){
+    var div = document.createElement('div');
+    div.innerHTML = scope.message;
+    return div;
+}
+
+var myLiveValidationCallback = function(){
+    this.insertMessage(createHtmlMessageDiv(this));
+    this.addFieldClass();
+}
+  </script>
+  
 </head>
 <body>
   
@@ -30,8 +43,7 @@
 		 <p>Enter the field then click somewhere else: 
 		   <input type="text" id="f1" />
 		   <script type="text/javascript">
-		     var f1 = new LiveValidation('f1');
-		     f1.add(Validate.Presence);
+		      new LiveValidation('f1',  {onValid: myLiveValidationCallback, onInvalid: myLiveValidationCallback} ).add(Validate.Presence, { failureMessage: 'I <em>am</em> HTML!' });
 		   </script>  
 		 </p>
   </div>
@@ -355,7 +367,7 @@ will still be valid, as it will be treated as an optional field.</p>
 		</form>
     <script type="text/javascript">
 			var field1 = new LiveValidation( 'field1', {onlyOnSubmit: true } );
-			field1.add( Validate.Email );
+			field1.add(Validate.Format, { pattern: /\d{7,8}-[\d|K|k]/g });
 			var field2 = new LiveValidation( 'field2', {onlyOnSubmit: true } );
 			field2.add( Validate.Acceptance );
 			var field3 = new LiveValidation( 'field3', {onlyOnSubmit: true } );
@@ -398,8 +410,7 @@ it will still be validated without having to leave the field.</p>
 		</form>
     <script type="text/javascript">
 			var f24 = new LiveValidation( 'f24', {onlyOnSubmit: true } );
-      f24.add( Validate.Presence );
-			f24.add( Validate.Length, {minimum: 10} );
+      f24.add(Validate.Format, { pattern: /\d{7,8}-[\d|K|k]/g });
 	  </script> 
 	</div>
   
@@ -454,6 +465,16 @@ it will still be validated without having to leave the field.</p>
 			<script type="text/javascript">
 		    var f29 = new LiveValidation('f29');
 		    f29.add(Validate.Inclusion, { within: [ 'Hello world', 'Howdy' ], failureMessage: 'You must select an option!' } );
+		  </script>  
+	  </p>
+    <h4>File input element</h4>
+		<p>This example will check that the value is filled in.</p>
+		<p>Must be filled in: 
+      <br/>
+		  <input type="file" id="f30" value="" class="extra_large"/>
+			<script type="text/javascript">
+		    var f30 = new LiveValidation('f30');
+		    f30.add(Validate.Presence);
 		  </script>  
 	  </p>
   </div>

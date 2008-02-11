@@ -39,6 +39,7 @@ LiveValidation.TEXT 			    = 2;
 LiveValidation.PASSWORD 		= 3;
 LiveValidation.CHECKBOX 		= 4;
 LiveValidation.SELECT = 5;
+LiveValidation.FILE = 6;
 
 /****** Static methods *******/
 
@@ -110,6 +111,7 @@ LiveValidation.prototype = {
             this.element.onclick = function(e){ self.validate(); return self.oldOnClick.call(this, e); }
           // let it run into the next to add a change event too
           case LiveValidation.SELECT:
+          case LiveValidation.FILE:
             this.element.onchange = function(e){ self.validate(); return self.oldOnChange.call(this, e); }
             break;
           default:
@@ -137,6 +139,7 @@ LiveValidation.prototype = {
             this.element.onclick = this.oldOnClick;
           // let it run into the next to add a change event too
           case LiveValidation.SELECT:
+          case LiveValidation.FILE:
             this.element.onchange = this.oldOnChange;
             break;
           default:
@@ -144,6 +147,7 @@ LiveValidation.prototype = {
       	    this.element.onblur = this.oldOnBlur;
         }
       }
+      this.validations = [];
 	  this.removeMessageAndFieldClass();
     },
     
@@ -193,17 +197,19 @@ LiveValidation.prototype = {
      */
     getElementType: function(){
       switch(true){
-        case (this.element.nodeName == 'TEXTAREA'):
-          return LiveValidation.TEXTAREA;
-        case (this.element.nodeName == 'INPUT' && this.element.type == 'text'):
-        	return LiveValidation.TEXT;
-        case (this.element.nodeName == 'INPUT' && this.element.type == 'password'):
-        	return LiveValidation.PASSWORD;
-        case (this.element.nodeName == 'INPUT' && this.element.type == 'checkbox'):
-        	return LiveValidation.CHECKBOX;
-        case (this.element.nodeName == 'SELECT'):
-          return LiveValidation.SELECT;
-        case (this.element.nodeName == 'INPUT'):
+        case (this.element.nodeName.toUpperCase() == 'TEXTAREA'):
+        return LiveValidation.TEXTAREA;
+      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'TEXT'):
+        return LiveValidation.TEXT;
+      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'PASSWORD'):
+        return LiveValidation.PASSWORD;
+      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'CHECKBOX'):
+        return LiveValidation.CHECKBOX;
+      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'FILE'):
+        return LiveValidation.FILE;
+      case (this.element.nodeName.toUpperCase() == 'SELECT'):
+        return LiveValidation.SELECT;
+        case (this.element.nodeName.toUpperCase() == 'INPUT'):
         	throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + this.element.type + ' input!');
         default:
         	throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea!');
@@ -284,7 +290,9 @@ LiveValidation.prototype = {
 			this.onInvalid();
 			return false;
 		}
-	  }
+	  }else{
+      return true;
+    }
     },
 	
  /**

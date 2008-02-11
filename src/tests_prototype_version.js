@@ -134,6 +134,9 @@ function runTests(){
         var selectEl = $('mySelect');
         selectEl.changeCheck = false;
         selectEl.onchange = function(){ this.changeCheck = true; }
+        var fileEl = $('myFile');
+        fileEl.changeCheck = false;
+        fileEl.onchange = function(){ this.changeCheck = true; }
         var formEl = $('myForm');
         formEl.submitCheck = false;
         formEl.onsubmit = function(){ this.submitCheck = true; return false; }
@@ -148,6 +151,8 @@ function runTests(){
         iChkEl.inlineClickCheck = false;
         var iSelectEl = $('myInlineSelect');
         iSelectEl.inlineChangeCheck = false;
+        var iFileEl = $('myInlineFile');
+        iFileEl.inlineChangeCheck = false;
         var iFormEl = $$('form')[1];
         iFormEl.inlineSubmitCheck = false;
         // make the first LiveValidation object and first inline events one and define others
@@ -158,6 +163,7 @@ function runTests(){
 		subjects.lv3;
 		subjects.lv4;
 		subjects.lv5;
+    subjects.lv6;
 		subjects.ilv = new LiveValidation('myInlineText');
 		subjects.ilv2;
     }},
@@ -170,6 +176,7 @@ function runTests(){
 		if( !Object.isUndefined(subjects.lv3) ) subjects.lv3.destroy();
 		if( !Object.isUndefined(subjects.lv4) ) subjects.lv4.destroy();
 		if( !Object.isUndefined(subjects.lv5) ) subjects.lv5.destroy();
+    if( !Object.isUndefined(subjects.lv5) ) subjects.lv6.destroy();
 		if( !Object.isUndefined(subjects.ilv) ) subjects.ilv.destroy();
 		if( !Object.isUndefined(subjects.ilv2) ) subjects.ilv2.destroy();
 		//if( !Object.isUndefined(subjects.lv.formObj) ) subjects.lv.formObj.destroy(true);
@@ -741,6 +748,10 @@ function runTests(){
 		subjects.lv.destroy(); //destroy previous to remove events etc.
         subjects.lv = new LiveValidation('mySelect');
         assertEqual(LiveValidation.SELECT, subjects.lv.getElementType('mySelect'));
+        // test it is  a file element
+		subjects.lv.destroy(); //destroy previous to remove events etc.
+        subjects.lv = new LiveValidation('myFile');
+        assertEqual(LiveValidation.FILE, subjects.lv.getElementType('myFile'));
     }},
     
     testValidateElement: function(){ with(this){
@@ -860,6 +871,7 @@ function runTests(){
         subjects.lv4.add(Validate.Acceptance);
         subjects.lv5 = new LiveValidation('mySelect');
         subjects.lv5.add(Validate.Inclusion, {within: ['Hello world', 'Howdy']});
+        subjects.lv6 = new LiveValidation('myFile');
         var vs = [subjects.lv, subjects.lv2, subjects.lv3, subjects.lv4, subjects.lv5];
         // test one by one that if all the others pass validation, and 1 should fail, that this causes the massValidate to return false
         subjects.lv.element.value = '';
