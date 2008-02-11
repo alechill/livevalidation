@@ -163,6 +163,28 @@ LiveValidation.prototype = {
       return this;
     },
     
+	/**
+     *	removes a validation from a LiveValidation object - must have exactly the same arguments as used to add it 
+     *
+     *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
+     *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+     * @return {Object} - the LiveValidation object itself so that calls can be chained
+     */
+    remove: function(validationFunction, validationParamsObj){
+	  var found = false;
+	  for( var i = 0, len = this.validations.length; i < len; i++ ){
+	  		if( this.validations[i].type == validationFunction ){
+				if (this.validations[i].params == validationParamsObj) {
+					found = true;
+					break;
+				}
+			}
+	  }
+      if(found) this.validations.splice(i,1);
+      return this;
+    },
+    
+	
     /**
      * makes the validation wait the alotted time from the last keystroke 
      */

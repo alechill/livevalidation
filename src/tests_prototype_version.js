@@ -728,6 +728,20 @@ function runTests(){
         assertEqual(Validate.Presence, subjects.lv.validations[0].type, "The validation type should be Validate.Presence");
         assertEqual(params , subjects.lv.validations[0].params, "The validation params should be an object of parameters");
     }},
+	
+	testRemove: function(){ with(this){
+        // add some validations - using similar params so we can test it finds the right one to remove
+        subjects.lv.add(Validate.Presence, {failureMessage: 'Invalid!'});
+		var params = {is:21, failureMessage: 'Invalid!'};
+		subjects.lv.add(Validate.Numericality, params);
+		subjects.lv.add(Validate.Length, {is:2, failureMessage: 'Invalid!'});
+		assertEqual(3, subjects.lv.validations.length, "Length should be 3" );
+		// now remove the Numericality validation (must use exactly the same params)
+		subjects.lv.remove(Validate.Numericality, params);
+		assertEqual(2, subjects.lv.validations.length, "Length should be 2" );
+		assertEqual(Validate.Presence, subjects.lv.validations[0].type, "The first validation should now be Validate.Presence");
+		assertEqual(Validate.Length, subjects.lv.validations[1].type, "The second validation should now be Validate.Length");
+	}},
     
     testGetElementType: function(){ with(this){
         // test it is  a text input

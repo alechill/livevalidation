@@ -160,9 +160,23 @@ LiveValidation.prototype = {
    * @return {Object} - the LiveValidation object itself so that calls can be chained
    */
   add: function(validationFunction, validationParamsObj){
-    this.validations.push( {type: validationFunction, params: validationParamsObj || {} } );
+    this.validations.push( { type: validationFunction, params: validationParamsObj || {} } );
     return this;
   },
+  
+  /**
+     *	removes a validation from a LiveValidation object - must have exactly the same arguments as used to add it 
+     *
+     *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
+     *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+     * @return {Object} - the LiveValidation object itself so that calls can be chained
+     */
+    remove: function(validationFunction, validationParamsObj){
+	  this.validations = this.validations.reject(function(v){
+	  	return (v.type == validationFunction && v.params == validationParamsObj);
+	  });
+	  return this;
+    },
     
   /**
    * makes the validation wait the alotted time from the last keystroke 
