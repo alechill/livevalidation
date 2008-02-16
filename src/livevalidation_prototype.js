@@ -807,6 +807,17 @@ var Validate = {
     if(!value) Validate.fail(params.failureMessage);
     return true;
   },
+  
+  
+  Custom: function(value, paramsObj){
+    var params = Object.extend({
+	  against: function(){ return true; },
+	  args: {},
+      failureMessage: "Not valid!"
+    }, paramsObj || {});
+    if(!params.against(value, params.args)) Validate.fail(params.failureMessage);
+    return true;
+  },
     
   /**
    *	validates whatever it is you pass in, and handles the validation error for you so it gives a nice true or false reply
@@ -830,7 +841,8 @@ var Validate = {
       return isValid 
     }
   },
-    
+  
+  
   Error: function(errorMessage){
     this.message = errorMessage;
     this.name = 'ValidationError';
