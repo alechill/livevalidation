@@ -112,7 +112,7 @@ Event.unloadCache = function() {
 }
 
 // reused in custom and create so defined here
-function isPrimeOrNotDivisibleBySpecified(value, argsObj){
+function isPrimeOrDivisibleBySpecified(value, argsObj){
 	var v = parseInt(value);
 	if(!v) return false;
 	var valid = false;
@@ -715,12 +715,12 @@ function runTests(){
 		// should be true as default function will return true
 		assert(Validate.Custom(7));
 		// seven is a prime number so should be true
-		assert(Validate.Custom(7,{against: window.isPrimeOrNotDivisibleBySpecified}));
+		assert(Validate.Custom(7,{against: window.isPrimeOrDivisibleBySpecified}));
 		// should be true as we are allowing 6 - testing args
-		assert(Validate.Custom(7,{against: window.isPrimeOrNotDivisibleBySpecified, args: {specified: 6}}));
+		assert(Validate.Custom(7,{against: window.isPrimeOrDivisibleBySpecified, args: {specified: 6}}));
 		// test for failure
 		try{
-            assertNotEqual(true, Validate.Custom(6,{against: window.isPrimeOrNotDivisibleBySpecified}));
+            assertNotEqual(true, Validate.Custom(6,{against: window.isPrimeOrDivisibleBySpecified}));
         }catch(error){
             assertEqual('ValidationError', error.name);
             if(error.name == 'ValidationError'){
@@ -729,31 +729,6 @@ function runTests(){
                 throw error;
             }
         }
-	}},
-	
-	
-	testValidateCreate: function(){ with(this){
-		/* 
-		// should be true as default function will return true
-		assert(Validate.Custom(7));
-		// seven is a prime number so should be true
-		assert(Validate.Custom(7,{against: window.isPrimeOrNotDivisibleBySpecified}));
-		// should be true as we are allowing 6 - testing args
-		assert(Validate.Custom(7,{against: window.isPrimeOrNotDivisibleBySpecified, args: {specified: 6}}));
-		// test for failure
-		try{
-            assertNotEqual(true, Validate.Custom(6,{against: window.isPrimeOrNotDivisibleBySpecified}));
-        }catch(error){
-            assertEqual('ValidationError', error.name);
-            if(error.name == 'ValidationError'){
-                assertEqual("Not valid!", error.message);
-            }else{
-                throw error;
-            }
-        }
-        */
-		Validate.create('Test');
-		assertNotEqual(undefined, Validate.Test);
 	}},
     
     /*********************** LiveValidation *****************************/

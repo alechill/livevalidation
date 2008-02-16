@@ -822,6 +822,15 @@ var Validate = {
     	return true;
     },
     
+	Custom: function(value, paramsObj){
+		var paramsObj = paramsObj || {};
+		var against = paramsObj.against || function(){ return true; };
+		var args = paramsObj.aargs || {};
+		var message = paramsObj.failureMessage || "Not valid!";
+	    if(!against(value, args)) Validate.fail(message);
+	    return true;
+	  },
+	
     /**
      *	validates whatever it is you pass in, and handles the validation error for you so it gives a nice true or false reply
      *

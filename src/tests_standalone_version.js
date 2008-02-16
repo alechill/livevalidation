@@ -111,6 +111,26 @@ Event.unloadCache = function() {
       Event.cache[id][eventName] = null;
 }
 
+// reused in custom and create so defined here
+function isPrimeOrDivisibleBySpecified(value, argsObj){
+	var v = parseInt(value);
+	if(!v) return false;
+	var valid = false;
+	if(argsObj.specified != undefined){
+		if(!(v % argsObj.specified)) valid = true;
+	} 
+	if(valid) return true;
+	var prime = true;
+	$R(2, v, true).each(function(num){
+		if (!(v % num)) {
+			prime = false;
+			return;
+		}			
+	});
+	return prime;
+}
+
+
 // defines and runs all the tests ///////////////////////////
 function runTests(){
 	
@@ -690,6 +710,26 @@ function runTests(){
         // test that it throws exception if the validation function provided does not exist
         //assertRaise("Validate::now - Validation function must be provided!", Validate.now(Validate.JollyRoger, true));
     }},
+	
+	testValidateCustom: function(){ with(this){
+		// should be true as default function will return true
+		assert(Validate.Custom(7));
+		// seven is a prime number so should be true
+		assert(Validate.Custom(7,{against: window.isPrimeOrDivisibleBySpecified}));
+		// should be true as we are allowing 6 - testing args
+		assert(Validate.Custom(7,{against: window.isPrimeOrDivisibleBySpecified, args: {specified: 6}}));
+		// test for failure
+		try{
+            assertNotEqual(true, Validate.Custom(6,{against: window.isPrimeOrDivisibleBySpecified}));
+        }catch(error){
+            assertEqual('ValidationError', error.name);
+            if(error.name == 'ValidationError'){
+                assertEqual("Not valid!", error.message);
+            }else{
+                throw error;
+            }
+        }
+	}},
     
     /*********************** LiveValidation *****************************/
    
