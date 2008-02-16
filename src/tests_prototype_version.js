@@ -702,15 +702,6 @@ function runTests(){
         }
     }},
     
-    testValidateNow: function(){ with(this){
-        // test that true is returned for a valid validation
-        assert(Validate.now(Validate.Acceptance, true));
-        // test that fasle is returned for an invalid validation
-        assert(!Validate.now(Validate.Acceptance, false));
-        // test that it throws exception if the validation function provided does not exist
-        //assertRaise("Validate::now - Validation function must be provided!", Validate.now(Validate.JollyRoger, true));
-    }},
-	
 	testValidateCustom: function(){ with(this){
 		// should be true as default function will return true
 		assert(Validate.Custom(7));
@@ -730,6 +721,15 @@ function runTests(){
             }
         }
 	}},
+	
+    testValidateNow: function(){ with(this){
+        // test that true is returned for a valid validation
+        assert(Validate.now(Validate.Acceptance, true));
+        // test that fasle is returned for an invalid validation
+        assert(!Validate.now(Validate.Acceptance, false));
+        // test that it throws exception if the validation function provided does not exist
+        //assertRaise("Validate::now - Validation function must be provided!", Validate.now(Validate.JollyRoger, true));
+    }},
     
     /*********************** LiveValidation *****************************/
    
