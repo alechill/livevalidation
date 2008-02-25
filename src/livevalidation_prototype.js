@@ -807,6 +807,30 @@ var Validate = {
     if(!value) Validate.fail(params.failureMessage);
     return true;
   },
+  
+   /**
+     *	validates against a custom function that returns true or false (or throws a Validate.Error) when passed the value
+     *	
+     *	@var value {mixed} - value to be checked
+     *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+     *
+     *	paramsObj properties:
+     *							failureMessage {String} - the message to show when the field fails validation
+     *													  (DEFAULT: "Not valid!")
+     *							against {Function} 			- a function that will take the value and object of arguments and return true or false 
+     *													  (DEFAULT: function(){ return true; })
+     *							args {Object} 		- an object of named arguments that will be passed to the custom function so are accessible through this object within it 
+     *													  (DEFAULT: {})
+     */
+  Custom: function(value, paramsObj){
+    var params = Object.extend({
+	  against: function(){ return true; },
+	  args: {},
+      failureMessage: "Not valid!"
+    }, paramsObj || {});
+    if(!params.against(value, params.args)) Validate.fail(params.failureMessage);
+    return true;
+  },
     
   /**
    *	validates whatever it is you pass in, and handles the validation error for you so it gives a nice true or false reply
@@ -830,6 +854,7 @@ var Validate = {
       return isValid 
     }
   },
+  
     
   Error: function(errorMessage){
     this.message = errorMessage;
