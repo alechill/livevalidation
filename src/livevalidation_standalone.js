@@ -34,12 +34,12 @@ LiveValidation.VERSION = '1.3 standalone';
 
 /** element types constants ****/
 
-LiveValidation.TEXTAREA 		= 1;
-LiveValidation.TEXT 			    = 2;
-LiveValidation.PASSWORD 		= 3;
-LiveValidation.CHECKBOX 		= 4;
-LiveValidation.SELECT = 5;
-LiveValidation.FILE = 6;
+LiveValidation.TEXTAREA = 1;
+LiveValidation.TEXT     = 2;
+LiveValidation.PASSWORD = 3;
+LiveValidation.CHECKBOX = 4;
+LiveValidation.SELECT   = 5;
+LiveValidation.FILE     = 6;
 
 /****** Static methods *******/
 
@@ -76,22 +76,28 @@ LiveValidation.prototype = {
     initialize: function(element, optionsObj){
       var self = this;
       if(!element) throw new Error("LiveValidation::initialize - No element reference or element id has been provided!");
-    	this.element = element.nodeName ? element : document.getElementById(element);
-    	if(!this.element) throw new Error("LiveValidation::initialize - No element with reference or id of '" + element + "' exists!");
+      this.element = element.nodeName ? element : document.getElementById(element);
+      if(!this.element) throw new Error("LiveValidation::initialize - No element with reference or id of '" + element + "' exists!");
       // default properties that could not be initialised above
-    	this.validations = [];
+      this.validations = [];
       this.elementType = this.getElementType();
       this.form = this.element.form;
       // options
-    	var options = optionsObj || {};
-    	this.validMessage = options.validMessage || 'Thankyou!';
-    	var node = options.insertAfterWhatNode || this.element;
-		this.insertAfterWhatNode = node.nodeType ? node : document.getElementById(node);
+      var options = optionsObj || {};
+      this.validMessage = options.validMessage || 'Thankyou!';
+      var node = options.insertAfterWhatNode || this.element;
+	  this.insertAfterWhatNode = node.nodeType ? node : document.getElementById(node);
       this.onValid = options.onValid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };
       this.onInvalid = options.onInvalid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };	
-    	this.onlyOnBlur =  options.onlyOnBlur || false;
-    	this.wait = options.wait || 0;
+      this.onlyOnBlur =  options.onlyOnBlur || false;
+      this.wait = options.wait || 0;
       this.onlyOnSubmit = options.onlyOnSubmit || false;
+	  this.beforeValidation = options.beforeValidation || function(){};
+	  this.afterValidation = options.afterValidation || function(){};
+	  this.beforeValid = options.beforeValid || function(){};
+	  this.afterValid = options.afterValid || function(){};
+	  this.beforeInvalid = options.beforeValid || function(){};
+	  this.afterInvalid = options.afterInvalid || function(){};	
       // add to form if it has been provided
       if(this.form){
         this.formObj = LiveValidationForm.getInstance(this.form);
@@ -190,7 +196,7 @@ LiveValidation.prototype = {
      */
     deferValidation: function(e){
       if(this.wait >= 300) this.removeMessageAndFieldClass();
-    	var self = this;
+      var self = this;
       if(this.timeout) clearTimeout(self.timeout);
       this.timeout = setTimeout( function(){ self.validate() }, self.wait); 
     },
@@ -218,25 +224,27 @@ LiveValidation.prototype = {
      *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
      */
     getElementType: function(){
-      switch(true){
-        case (this.element.nodeName.toUpperCase() == 'TEXTAREA'):
-        return LiveValidation.TEXTAREA;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'TEXT'):
-        return LiveValidation.TEXT;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'PASSWORD'):
-        return LiveValidation.PASSWORD;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'CHECKBOX'):
-        return LiveValidation.CHECKBOX;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'FILE'):
-        return LiveValidation.FILE;
-      case (this.element.nodeName.toUpperCase() == 'SELECT'):
-        return LiveValidation.SELECT;
-        case (this.element.nodeName.toUpperCase() == 'INPUT'):
-        	throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + this.element.type + ' input!');
-        default:
-        	throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea!');
-      }
-    },
+		var nn = this.element.nodeName;
+		var nt = this.element.type;
+	    switch(true){
+	      case (nn.toUpperCase() == 'TEXTAREA'):
+	        return LiveValidation.TEXTAREA;
+	      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'TEXT'):
+	        return LiveValidation.TEXT;
+	      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'PASSWORD'):
+	        return LiveValidation.PASSWORD;
+	      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'CHECKBOX'):
+	        return LiveValidation.CHECKBOX;
+	      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'FILE'):
+	        return LiveValidation.FILE;
+	      case (nn.toUpperCase() == 'SELECT'):
+	        return LiveValidation.SELECT;
+	      case (nn.toUpperCase() == 'INPUT'):
+	        throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + nt + ' input!');
+	      default:
+	        throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea - ' + nn.toLowerCase() + ' was given!');
+	    }
+	  },
     
     /**
      *	loops through all the validations added to the LiveValidation object and checks them one by one
@@ -298,23 +306,29 @@ LiveValidation.prototype = {
     },
     
     /**
-     *	makes it do the all the validations and fires off the onValid or onInvalid callbacks
+     *	makes it do the all the validations and fires off the various callbacks
      *
      * @return {Boolean} - whether the all the validations passed or if one failed
      */
     validate: function(){
       if(!this.element.disabled){
+		this.beforeValidation();
 		var isValid = this.doValidations();
 		if(isValid){
+			this.beforeValid();
 			this.onValid();
+			this.afterValid();
 			return true;
 		}else {
+			this.beforeInvalid();
 			this.onInvalid();
+			this.afterInvalid();
 			return false;
 		}
+		this.afterValidation();
 	  }else{
-      return true;
-    }
+      	return true;
+      }
     },
 	
  /**
@@ -368,10 +382,11 @@ LiveValidation.prototype = {
     	  || this.element.value != '' ){
             var className = this.validationFailed ? this.invalidClass : this.validClass;
     	  	elementToInsert.className += ' ' + this.messageClass + ' ' + className;
+			var parent = this.insertAfterWhatNode.parentNode;
             if(this.insertAfterWhatNode.nextSibling){
-    		  		this.insertAfterWhatNode.parentNode.insertBefore(elementToInsert, this.insertAfterWhatNode.nextSibling);
+    		  	parent.insertBefore(elementToInsert, this.insertAfterWhatNode.nextSibling);
     		}else{
-    			    this.insertAfterWhatNode.parentNode.appendChild(elementToInsert);
+    	        parent.appendChild(elementToInsert);
     	    }
     	}
     },
@@ -411,8 +426,9 @@ LiveValidation.prototype = {
      *	removes the class that has been applied to the field to indicte if valid or not
      */
     removeFieldClass: function(){
-      if(this.element.className.indexOf(this.invalidFieldClass) != -1) this.element.className = this.element.className.split(this.invalidFieldClass).join('');
-      if(this.element.className.indexOf(this.validFieldClass) != -1) this.element.className = this.element.className.split(this.validFieldClass).join(' ');
+	  var cn = this.element.className;
+      if(cn.indexOf(this.invalidFieldClass) != -1) this.element.className = cn.split(this.invalidFieldClass).join('');
+      if(cn.indexOf(this.validFieldClass) != -1) this.element.className = cn.split(this.validFieldClass).join(' ');
     },
         
     /**
@@ -547,9 +563,7 @@ var Validate = {
     Presence: function(value, paramsObj){
       	var paramsObj = paramsObj || {};
     	var message = paramsObj.failureMessage || "Can't be empty!";
-    	if(value === '' || value === null || value === undefined){ 
-    	  	Validate.fail(message);
-    	}
+    	if(value === '' || value === null || value === undefined) Validate.fail(message);
     	return true;
     },
     
@@ -631,13 +645,13 @@ var Validate = {
      */
     Format: function(value, paramsObj){
       var value = String(value);
-    	var paramsObj = paramsObj || {};
-    	var message = paramsObj.failureMessage || "Not valid!";
+      var paramsObj = paramsObj || {};
+      var message = paramsObj.failureMessage || "Not valid!";
       var pattern = paramsObj.pattern || /./;
       var negate = paramsObj.negate || false;
       if(!negate && !pattern.test(value)) Validate.fail(message); // normal
       if(negate && pattern.test(value)) Validate.fail(message); // negated
-    	return true;
+      return true;
     },
     
     /**
@@ -774,9 +788,9 @@ var Validate = {
      */
     Exclusion: function(value, paramsObj){
       var paramsObj = paramsObj || {};
-    	paramsObj.failureMessage = paramsObj.failureMessage || "Must not be included in the list!";
+      paramsObj.failureMessage = paramsObj.failureMessage || "Must not be included in the list!";
       paramsObj.negate = true;
-    	Validate.Inclusion(value, paramsObj);
+      Validate.Inclusion(value, paramsObj);
       return true;
     },
     
@@ -797,9 +811,7 @@ var Validate = {
     	var message = paramsObj.failureMessage || "Does not match!";
     	var match = paramsObj.match.nodeName ? paramsObj.match : document.getElementById(paramsObj.match);
     	if(!match) throw new Error("Validate::Confirmation - There is no reference with name of, or element with id of '" + paramsObj.match + "'!");
-    	if(value != match.value){ 
-    	  	Validate.fail(message);
-    	}
+    	if(value != match.value) Validate.fail(message);
     	return true;
     },
     
@@ -816,9 +828,7 @@ var Validate = {
     Acceptance: function(value, paramsObj){
       	var paramsObj = paramsObj || {};
     	var message = paramsObj.failureMessage || "Must be accepted!";
-    	if(!value){ 
-    	  	Validate.fail(message);
-    	}
+    	if(!value) Validate.fail(message);
     	return true;
     },
     
@@ -832,7 +842,7 @@ var Validate = {
      *							failureMessage {String} - the message to show when the field fails validation
      *													  (DEFAULT: "Not valid!")
      *							against {Function} 			- a function that will take the value and object of arguments and return true or false 
-     *													  (DEFAULT: function(){ return true; })
+     *													  (DEFAULT: function(value, argsObj){ return true; })
      *							args {Object} 		- an object of named arguments that will be passed to the custom function so are accessible through this object within it 
      *													  (DEFAULT: {})
      */

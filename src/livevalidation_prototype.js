@@ -14,11 +14,11 @@ Object.extend(LiveValidation, {
   
   /*** element types constants ***/
   TEXTAREA:  1,
-  TEXT:         2,
-  PASSWORD: 3,
+  TEXT:      2,
+  PASSWORD:  3,
   CHECKBOX:  4,
-  SELECT:      5,
-  FILE:          6,
+  SELECT:    5,
+  FILE:      6,
 
   /**
    *	pass an array of LiveValidation objects and it will validate all of them
@@ -27,12 +27,12 @@ Object.extend(LiveValidation, {
    *	@return {Bool} - true if all passed validation, false if any fail						
    */
   massValidate: function(validations){
-    var returnValue = true;
+    var ret = true;
     for(var i = 0, len = validations.length; i < len; ++i ){
       var valid = validations[i].validate();
-      if(returnValue) returnValue = valid;
+      if(ret) ret = valid;
     }
-    return returnValue;
+    return ret;
   }
 
 });
@@ -86,7 +86,13 @@ LiveValidation.prototype = {
       insertAfterWhatNode: this.element,
       onlyOnBlur: false,
       wait: 0,
-      onlyOnSubmit: false
+      onlyOnSubmit: false,
+	  beforeValidation: Prototype.emptyFunction,
+	  afterValidation: Prototype.emptyFunction,
+	  beforeValid: Prototype.emptyFunction,
+	  afterValid: Prototype.emptyFunction,
+	  beforeInvalid: Prototype.emptyFunction,
+	  afterInvalid: Prototype.emptyFunction,
     }, optionsObj || {});
 	var node = this.options.insertAfterWhatNode || this.element;
     this.options.insertAfterWhatNode = $(node);
@@ -98,26 +104,26 @@ LiveValidation.prototype = {
     }
     // events
 	// event callbacks are cached so they can be stopped being observed
-	this.boundFocus = this.doOnFocus.bindAsEventListener(this);
-    Event.observe(this.element, 'focus', this.boundFocus);
+	this.cFocus = this.doOnFocus.bindAsEventListener(this);
+    Event.observe(this.element, 'focus', this.cFocus);
     if(!this.onlyOnSubmit){
       switch(this.elementType){
         case LiveValidation.CHECKBOX:
-		  this.boundClick = this.validate.bindAsEventListener(this);
-          Event.observe(this.element, 'click', this.boundClick);
+		  this.cClick = this.validate.bindAsEventListener(this);
+          Event.observe(this.element, 'click', this.cClick);
           // let it run into the next to add a change event too
         case LiveValidation.SELECT:
         case LiveValidation.FILE:
-		  this.boundChange = this.validate.bindAsEventListener(this);
-          Event.observe(this.element, 'change', this.boundChange);
+		  this.cChange = this.validate.bindAsEventListener(this);
+          Event.observe(this.element, 'change', this.cChange);
           break;
         default:
           if(!this.onlyOnBlur){
-		  	this.boundKeyup = this.deferValidation.bindAsEventListener(this);
-		  	Event.observe(this.element, 'keyup', this.boundKeyup);
+		  	this.cKeyup = this.deferValidation.bindAsEventListener(this);
+		  	Event.observe(this.element, 'keyup', this.cKeyup);
 		  }
-          this.boundBlur = this.validate.bindAsEventListener(this);
-		  Event.observe(this.element, 'blur', this.boundBlur);
+          this.cBlur = this.validate.bindAsEventListener(this);
+		  Event.observe(this.element, 'blur', this.cBlur);
       }
     }
   },
@@ -133,19 +139,20 @@ LiveValidation.prototype = {
 		this.formObj.destroy();
 	}
     // remove events
-    Event.stopObserving(this.element, 'focus', this.boundFocus);
+	var el = this.element;
+    Event.stopObserving(el, 'focus', this.cFocus);
     if(!this.onlyOnSubmit){
       switch(this.elementType){
         case LiveValidation.CHECKBOX:
-          Event.stopObserving(this.element, 'click', this.boundClick);
+          Event.stopObserving(el, 'click', this.cClick);
           // let it run into the next to add a change event too
         case LiveValidation.SELECT:
         case LiveValidation.FILE:
-          Event.stopObserving(this.element, 'change', this.boundChange);
+          Event.stopObserving(el, 'change', this.cChange);
           break;
         default:
-          if(!this.onlyOnBlur) Event.stopObserving(this.element, 'keyup', this.boundKeyup);
-          Event.stopObserving(this.element, 'blur', this.boundBlur);
+          if(!this.onlyOnBlur) Event.stopObserving(el, 'keyup', this.cKeyup);
+          Event.stopObserving(el, 'blur', this.cBlur);
       }
     }
     this.validations = [];
@@ -171,12 +178,12 @@ LiveValidation.prototype = {
      *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
      * @return {Object} - the LiveValidation object itself so that calls can be chained
      */
-    remove: function(validationFunction, validationParamsObj){
-	  this.validations = this.validations.reject(function(v){
-	  	return (v.type == validationFunction && v.params == validationParamsObj);
-	  });
-	  return this;
-    },
+  remove: function(validationFunction, validationParamsObj){
+	this.validations = this.validations.reject(function(v){
+	  return (v.type == validationFunction && v.params == validationParamsObj);
+	});
+	return this;
+  },
     
   /**
    * makes the validation wait the alotted time from the last keystroke 
@@ -210,23 +217,25 @@ LiveValidation.prototype = {
    *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    */
   getElementType: function(){
+	var nn = this.element.nodeName;
+	var nt = this.element.type;
     switch(true){
-      case (this.element.nodeName.toUpperCase() == 'TEXTAREA'):
+      case (nn.toUpperCase() == 'TEXTAREA'):
         return LiveValidation.TEXTAREA;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'TEXT'):
+      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'TEXT'):
         return LiveValidation.TEXT;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'PASSWORD'):
+      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'PASSWORD'):
         return LiveValidation.PASSWORD;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'CHECKBOX'):
+      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'CHECKBOX'):
         return LiveValidation.CHECKBOX;
-      case (this.element.nodeName.toUpperCase() == 'INPUT' && this.element.type.toUpperCase() == 'FILE'):
+      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'FILE'):
         return LiveValidation.FILE;
-      case (this.element.nodeName.toUpperCase() == 'SELECT'):
+      case (nn.toUpperCase() == 'SELECT'):
         return LiveValidation.SELECT;
-      case (this.element.nodeName.toUpperCase() == 'INPUT'):
-        throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + this.element.type + ' input!');
+      case (nn.toUpperCase() == 'INPUT'):
+        throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + nt + ' input!');
       default:
-        throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea!');
+        throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea - ' + nn.toLowerCase() + ' was given!');
     }
   },
     
@@ -290,23 +299,29 @@ LiveValidation.prototype = {
   },
     
   /**
-   *	makes it do the all the validations and fires off the onValid or onInvalid callbacks
+   *	makes it do the all the validations and fires off the various callbacks
    *
    * @return {Boolean} - whether the all the validations passed or if one failed
    */
   validate: function(){
   	if(!this.element.disabled){
+		this.beforeValidation();
 		var isValid = this.doValidations();
 		if(isValid){
+			this.beforeValid();
 			this.onValid();
+			this.afterValid();
 			return true;
 		}else {
+			this.beforeInvalid();
 			this.onInvalid();
+			this.afterInvalid();
 			return false;
 		}
+		this.afterValidation();
 	}else{
-    return true;
-  }
+      return true;
+    }
   },
   
   /**
@@ -352,17 +367,18 @@ LiveValidation.prototype = {
   /**
    *	inserts the element containing the message in place of the element that already exists (if it does)
    *
-   * @var elementToIsert {HTMLElementObject} - an element node to insert
+   * @var elementToInsert {HTMLElementObject} - an element node to insert
    */
   insertMessage: function(elementToInsert){
     this.removeMessage();
     var className = this.validationFailed ? this.invalidClass : this.validClass;
     if( (this.displayMessageWhenEmpty && (this.elementType == LiveValidation.CHECKBOX || this.element.value == '')) || this.element.value != '' ){
-      $(elementToInsert).addClassName( this.messageClass + (' ' + className) );
-      if( nxtSibling = this.insertAfterWhatNode.nextSibling){
-        this.insertAfterWhatNode.parentNode.insertBefore(elementToInsert, nxtSibling);
+      $(elementToInsert).addClassName( this.messageClass + ' ' + className );
+	  var parent = this.insertAfterWhatNode.up();
+      if( nxtSibling = this.insertAfterWhatNode.next()){
+        parent.insertBefore(elementToInsert, nxtSibling);
       }else{
-        this.insertAfterWhatNode.parentNode.appendChild(elementToInsert);
+        parent.appendChild(elementToInsert);
       }
     }
   },
@@ -385,7 +401,8 @@ LiveValidation.prototype = {
    *	removes the message element if it exists
    */
   removeMessage: function(){
-    if( nxtEl = this.insertAfterWhatNode.next('.' + this.messageClass) ) nxtEl.remove();
+	var nxtEl = this.insertAfterWhatNode.next('.' + this.messageClass);
+    if(nxtEl) nxtEl.remove();
   },
     
   /**
@@ -448,7 +465,7 @@ LiveValidationForm.prototype = {
     // need to capture onsubmit in this way rather than Event.observe because Rails helpers add events inline
 	// and must ensure that the validation is run before any previous submit events 
 	//(hence not using Event.observe, as inline events appear to be captured before prototype events)
-	this.oldOnSubmit = this.element.onsubmit || function(){};
+	this.oldOnSubmit = this.element.onsubmit || Prototype.emptyFunction;
 	this.element.onsubmit = function(e){
 	  var ret = (LiveValidation.massValidate(this.fields)) ? this.oldOnSubmit.call(this.element, e) !== false : false;
 	  if (!ret) Event.stop(e)
@@ -608,8 +625,8 @@ var Validate = {
     var value = String(value);
     var params = Object.extend({ 
       failureMessage: "Not valid!",
-      pattern:           /./ ,
-      negate:            false
+      pattern:        /./,
+      negate:   	  false
     }, paramsObj || {});
     if(!params.negate && !params.pattern.test(value)) Validate.fail(params.failureMessage); // normal
     if(params.negate && params.pattern.test(value)) Validate.fail(params.failureMessage); // negated
@@ -818,7 +835,7 @@ var Validate = {
      *							failureMessage {String} - the message to show when the field fails validation
      *													  (DEFAULT: "Not valid!")
      *							against {Function} 			- a function that will take the value and object of arguments and return true or false 
-     *													  (DEFAULT: function(){ return true; })
+     *													  (DEFAULT: function(value, argsObj){ return true; })
      *							args {Object} 		- an object of named arguments that will be passed to the custom function so are accessible through this object within it 
      *													  (DEFAULT: {})
      */
@@ -844,7 +861,7 @@ var Validate = {
     var isValid = true;
     try{    
       validationFunction(value, validationParamsObj || {});
-    } catch(error) {
+    }catch(error){
       if(error instanceof Validate.Error){
         isValid =  false;
       }else{
