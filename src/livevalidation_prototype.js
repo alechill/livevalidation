@@ -1,4 +1,4 @@
-// LiveValidation 1.3 (prototype.js version)
+// LiveValidation 1.4 (prototype.js version)
 // Copyright (c) 2007-2008 Alec Hill (www.livevalidation.com)
 // LiveValidation is licensed under the terms of the MIT License
 
@@ -10,7 +10,7 @@ var LiveValidation = Class.create();
 
 Object.extend(LiveValidation, {
   
-  VERSION: '1.3 prototype',
+  VERSION: '1.4 prototype',
   
   /*** element types constants ***/
   TEXTAREA:  1,
@@ -87,12 +87,12 @@ LiveValidation.prototype = {
       onlyOnBlur: false,
       wait: 0,
       onlyOnSubmit: false,
-	  beforeValidation: Prototype.emptyFunction,
-	  afterValidation: Prototype.emptyFunction,
-	  beforeValid: Prototype.emptyFunction,
-	  afterValid: Prototype.emptyFunction,
-	  beforeInvalid: Prototype.emptyFunction,
-	  afterInvalid: Prototype.emptyFunction,
+	  beforeValidation: function(){},
+	  afterValidation: function(){},
+	  beforeValid: function(){},
+	  afterValid: function(){},
+	  beforeInvalid: function(){},
+	  afterInvalid: function(){},
     }, optionsObj || {});
 	var node = this.options.insertAfterWhatNode || this.element;
     this.options.insertAfterWhatNode = $(node);
@@ -371,9 +371,10 @@ LiveValidation.prototype = {
    */
   insertMessage: function(elementToInsert){
     this.removeMessage();
-    var className = this.validationFailed ? this.invalidClass : this.validClass;
+    if(!this.validationFailed && !this.validMessage) return; // dont insert anything if vaalidMesssage has been set to false
     if( (this.displayMessageWhenEmpty && (this.elementType == LiveValidation.CHECKBOX || this.element.value == '')) || this.element.value != '' ){
-      $(elementToInsert).addClassName( this.messageClass + ' ' + className );
+      var className = this.validationFailed ? this.invalidClass : this.validClass;
+	  $(elementToInsert).addClassName( this.messageClass + ' ' + className );
 	  var parent = this.insertAfterWhatNode.up();
       if( nxtSibling = this.insertAfterWhatNode.next()){
         parent.insertBefore(elementToInsert, nxtSibling);
@@ -439,13 +440,15 @@ Object.extend(LiveValidationForm, {
 	/**
 	   *	gets the instance of the LiveValidationForm if it has already been made or creates it if it doesnt exist
 	   *	
-	   *	@var element {HTMLFormElement} - a dom element reference to a form
+	   *	@var element {mixed} - a dom element reference to or id of a form
 	   */
 	getInstance: function(element){
+	  if(!element) throw new Error("LiveValidationForm::getInstance - No element reference or element id has been provided!");
+	  var el = $(element);
 	  var rand = Math.random() * Math.random();
-	  if(!element.id) element.id = 'formId_' + rand.toString().replace(/\./, '') + new Date().valueOf();
-	  if(!LiveValidationForm.instances[element.id]) LiveValidationForm.instances[element.id] = new LiveValidationForm(element);
-	  return LiveValidationForm.instances[element.id];
+	  if(!el.id) el.id = 'formId_' + rand.toString().replace(/\./, '') + new Date().valueOf();
+	  if(!LiveValidationForm.instances[el.id]) LiveValidationForm.instances[el.id] = new LiveValidationForm(el);
+	  return LiveValidationForm.instances[el.id];
 	}
 
 });
@@ -454,6 +457,11 @@ Object.extend(LiveValidationForm, {
 
 LiveValidationForm.prototype = {
   
+  beforeValidation: function(){},
+  afterValidation: function(){},
+  onValid: function(){},
+  onInvalid: function(){},
+
   /**
    *	constructor for LiveValidationForm - handles validation of LiveValidation fields belonging to this form on its submittal
    *	
@@ -465,10 +473,15 @@ LiveValidationForm.prototype = {
     // need to capture onsubmit in this way rather than Event.observe because Rails helpers add events inline
 	// and must ensure that the validation is run before any previous submit events 
 	//(hence not using Event.observe, as inline events appear to be captured before prototype events)
-	this.oldOnSubmit = this.element.onsubmit || Prototype.emptyFunction;
+	this.oldOnSubmit = this.element.onsubmit || function(){};
 	this.element.onsubmit = function(e){
-	  var ret = (LiveValidation.massValidate(this.fields)) ? this.oldOnSubmit.call(this.element, e) !== false : false;
-	  if (!ret) Event.stop(e)
+	  var ret = false;
+	  this.beforeValidation(),
+      this.valid = LiveValidation.massValidate(this.fields);
+      this.valid ? this.onValid() : this.onInvalid();
+      this.afterValidation();
+	  if(this.valid) ret = this.oldOnSubmit.call(this.element, e) !== false;
+	  if(!ret) Event.stop(e);
     }.bindAsEventListener(this);
   },
   
@@ -863,7 +876,7 @@ var Validate = {
       validationFunction(value, validationParamsObj || {});
     }catch(error){
       if(error instanceof Validate.Error){
-        isValid =  false;
+        isValid = false;
       }else{
         throw error;
       }

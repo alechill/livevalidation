@@ -1,4 +1,4 @@
-// LiveValidation 1.3 (standalone version)
+// LiveValidation 1.4 (standalone version)
 // Copyright (c) 2007-2008 Alec Hill (www.livevalidation.com)
 // LiveValidation is licensed under the terms of the MIT License
 
@@ -30,7 +30,7 @@ var LiveValidation = function(element, optionsObj){
   	this.initialize(element, optionsObj);
 }
 
-LiveValidation.VERSION = '1.3 standalone';
+LiveValidation.VERSION = '1.4 standalone';
 
 /** element types constants ****/
 
@@ -67,7 +67,7 @@ LiveValidation.prototype = {
     messageClass: 'LV_validation_message',
     validFieldClass: 'LV_valid_field',
     invalidFieldClass: 'LV_invalid_field',
-
+    
     /**
      *	initialises all of the properties and events
      *
@@ -96,7 +96,7 @@ LiveValidation.prototype = {
 	  this.afterValidation = options.afterValidation || function(){};
 	  this.beforeValid = options.beforeValid || function(){};
 	  this.afterValid = options.afterValid || function(){};
-	  this.beforeInvalid = options.beforeValid || function(){};
+	  this.beforeInvalid = options.beforeInvalid || function(){};
 	  this.afterInvalid = options.afterInvalid || function(){};	
       // add to form if it has been provided
       if(this.form){
@@ -177,16 +177,12 @@ LiveValidation.prototype = {
      * @return {Object} - the LiveValidation object itself so that calls can be chained
      */
     remove: function(validationFunction, validationParamsObj){
-	  var found = false;
-	  for( var i = 0, len = this.validations.length; i < len; i++ ){
-	  		if( this.validations[i].type == validationFunction ){
-				if (this.validations[i].params == validationParamsObj) {
-					found = true;
-					break;
-				}
-			}
+  	  var victimless = [];
+  	  for( var i = 0, len = this.validations.length; i < len; i++){
+	       var v = this.validations[i];
+	       if(v.type != validationFunction && v.params != validationParamsObj) victimless.push(v);
 	  }
-      if(found) this.validations.splice(i,1);
+	  this.validations = victimless;
       return this;
     },
     
@@ -378,7 +374,9 @@ LiveValidation.prototype = {
      */
     insertMessage: function(elementToInsert){
       	this.removeMessage();
-      	if( (this.displayMessageWhenEmpty && (this.elementType == LiveValidation.CHECKBOX || this.element.value == ''))
+		if(!this.validationFailed && !this.validMessage) return; // dont insert anything if vaalidMesssage has been set to false
+      	if( (this.displayMessageWhenEmpty 
+	      && (this.elementType == LiveValidation.CHECKBOX || this.element.value == ''))
     	  || this.element.value != '' ){
             var className = this.validationFailed ? this.invalidClass : this.validClass;
     	  	elementToInsert.className += ' ' + this.messageClass + ' ' + className;
@@ -466,16 +464,23 @@ LiveValidationForm.instances = {};
 /**
    *	gets the instance of the LiveValidationForm if it has already been made or creates it if it doesnt exist
    *	
-   *	@var element {HTMLFormElement} - a dom element reference to a form
+   *	@var element {mixed} - a dom element reference to or id of a form
    */
 LiveValidationForm.getInstance = function(element){
+  if(!element) throw new Error("LiveValidationForm::getInstance - No element reference or element id has been provided!");
+  var el = element.nodeName ? element : document.getElementById(element);
   var rand = Math.random() * Math.random();
-  if(!element.id) element.id = 'formId_' + rand.toString().replace(/\./, '') + new Date().valueOf();
-  if(!LiveValidationForm.instances[element.id]) LiveValidationForm.instances[element.id] = new LiveValidationForm(element);
-  return LiveValidationForm.instances[element.id];
+  if(!el.id) el.id = 'formId_' + rand.toString().replace(/\./, '') + new Date().valueOf();
+  if(!LiveValidationForm.instances[el.id]) LiveValidationForm.instances[el.id] = new LiveValidationForm(el);
+  return LiveValidationForm.instances[el.id];
 }
 
 LiveValidationForm.prototype = {
+  
+  beforeValidation: function(){},
+  afterValidation: function(){},
+  onValid: function(){},
+  onInvalid: function(){},
   
   /**
    *	constructor for LiveValidationForm - handles validation of LiveValidation fields belonging to this form on its submittal
@@ -490,7 +495,13 @@ LiveValidationForm.prototype = {
 	this.oldOnSubmit = this.element.onsubmit || function(){};
     var self = this;
     this.element.onsubmit = function(e){
-      return (LiveValidation.massValidate(self.fields)) ? self.oldOnSubmit.call(this, e || window.event) !== false : false;
+      var ret = false;
+      self.beforeValidation(),
+      self.valid = LiveValidation.massValidate(self.fields);
+      self.valid ? self.onValid() : self.onInvalid();
+      self.afterValidation();
+	  if(self.valid) ret = self.oldOnSubmit.call(this, e || window.event) !== false;
+	  if(!ret) return ret;
     }
   },
   
@@ -849,7 +860,7 @@ var Validate = {
 	Custom: function(value, paramsObj){
 		var paramsObj = paramsObj || {};
 		var against = paramsObj.against || function(){ return true; };
-		var args = paramsObj.aargs || {};
+		var args = paramsObj.args || {};
 		var message = paramsObj.failureMessage || "Not valid!";
 	    if(!against(value, args)) Validate.fail(message);
 	    return true;
