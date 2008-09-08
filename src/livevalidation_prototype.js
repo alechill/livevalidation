@@ -56,10 +56,22 @@ LiveValidation.prototype = {
    *	optionsObj properties:
    *							validMessage {String} 	- the message to show when the field passes validation
    *													  (DEFAULT: "Thankyou!")
+   *                            beforeValidation {Function} - function to execute directly before validation is performed
+   *													  (DEFAULT: function(){})
+   *                            beforeValid {Function}  - function to execute directly before the onValid function is executed
+   *													  (DEFAULT: function(){})
    *							onValid {Function} 		- function to execute when field passes validation
-   *													  (DEFAULT: function(){ this.insertMessage(this.createMessageSpan()s); this.addFieldClass(); } )	
+   *													  (DEFAULT: function(){ this.insertMessage(this.createMessageSpan()s); this.addFieldClass(); } )
+   *                            afterValid {Function}   - function to execute directly after the onValid function is executed
+   *													  (DEFAULT: function(){})
+   *                            beforeInvalid {Function} - function to execute directly before the onInvalid function is executed
+   *													  (DEFAULT: function(){})	
    *							onInvalid {Function} 	- function to execute when field fails validation
    *													  (DEFAULT: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); })
+   *                            aterInvalid {Function}  - function to execute directly after the onInvalid function is executed
+   *													  (DEFAULT: function(){})
+   *                            afterValidation {Function} - function to execute directly after validation is performed
+   *													  (DEFAULT: function(){})
    *							insertAfterWhatNode {mixed} 	- reference or id of node to have the message inserted after 
    *													  (DEFAULT: the field that is being validated
    *              onlyOnBlur {Boolean} - whether you want it to validate as you type or only on blur
@@ -81,18 +93,19 @@ LiveValidation.prototype = {
     // overwrite the options defaults with passed in ones
     this.options = Object.extend({
       validMessage: 'Thankyou!',
-      onValid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
-      onInvalid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
       insertAfterWhatNode: this.element,
       onlyOnBlur: false,
       wait: 0,
       onlyOnSubmit: false,
+	  // hooks
 	  beforeValidation: function(){},
-	  afterValidation: function(){},
 	  beforeValid: function(){},
+	  onValid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
 	  afterValid: function(){},
 	  beforeInvalid: function(){},
+	  onInvalid: function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); },
 	  afterInvalid: function(){},
+	  afterValidation: function(){},
     }, optionsObj || {});
 	var node = this.options.insertAfterWhatNode || this.element;
     this.options.insertAfterWhatNode = $(node);
@@ -249,18 +262,18 @@ LiveValidation.prototype = {
   doValidations: function(){
     this.validationFailed = false;
     for(var i = 0, len = this.validations.length; i < len; ++i){
-      var validation = this.validations[i];
-      switch(validation.type){
-        case Validate.Presence:
+      var v = this.validations[i];
+	  switch(v.type){
+   		case Validate.Presence:
         case Validate.Confirmation:
         case Validate.Acceptance:
-          this.displayMessageWhenEmpty = true;
-          this.validationFailed = !this.validateElement(validation.type, validation.params); 
-          break;
-        default:
-          this.validationFailed = !this.validateElement(validation.type, validation.params);
-          break;
+    	  this.displayMessageWhenEmpty = true;
+    	  break;
+		case Validate.Custom:
+	      if(v.params.displayMessageWhenEmpty) this.displayMessageWhenEmpty = true;
+		  break;
       }
+	  this.validationFailed = !this.validateElement(v.type, v.params);
       if(this.validationFailed) return false;	
     }
     this.message = this.validMessage;
@@ -425,6 +438,12 @@ LiveValidation.prototype = {
 } // end of LiveValidation.prototype object
 
 /*************************************** LiveValidationForm class ****************************************/
+/**
+ * This class is used internally by LiveValidation class to associate a LiveValidation field with a form it is icontained in one
+ * 
+ * It will therefore not really ever be needed to be used directly by the developer, unless they want to associate a LiveValidation 
+ * field with a form that it is not a child of, or add some extra functionality via the hooks (access through a LiveValidation object's formObj property)
+ */
 
 var LiveValidationForm = Class.create();
 
@@ -457,10 +476,11 @@ Object.extend(LiveValidationForm, {
 
 LiveValidationForm.prototype = {
   
+  // hooks
   beforeValidation: function(){},
-  afterValidation: function(){},
   onValid: function(){},
   onInvalid: function(){},
+  afterValidation: function(){},
 
   /**
    *	constructor for LiveValidationForm - handles validation of LiveValidation fields belonging to this form on its submittal
