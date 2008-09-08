@@ -839,7 +839,7 @@ var Validate = {
 	Custom: function(value, paramsObj){
 		var paramsObj = paramsObj || {};
 		var against = paramsObj.against || function(){ return true; };
-		var args = paramsObj.aargs || {};
+		var args = paramsObj.args || {};
 		var message = paramsObj.failureMessage || "Not valid!";
 	    if(!against(value, args)) Validate.fail(message);
 	    return true;
