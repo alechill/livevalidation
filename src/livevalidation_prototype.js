@@ -23,7 +23,7 @@ Object.extend(LiveValidation, {
   /**
    *	pass an array of LiveValidation objects and it will validate all of them
    *	
-   *	@var validations {Array} - an array of LiveValidation objects
+   *	@param validations {Array} - an array of LiveValidation objects
    *	@return {Bool} - true if all passed validation, false if any fail						
    */
   massValidate: function(validations){
@@ -50,8 +50,8 @@ LiveValidation.prototype = {
   /**
    *	constructor for LiveValidation - validates a form field in real-time based on validations you assign to it
    *	
-   *	@var element {mixed} - either a dom element reference or the string id of the element to validate
-   *	@var optionsObj {Object} - general options, see below for details
+   *	@param element {mixed} - either a dom element reference or the string id of the element to validate
+   *	@param optionsObj {Object} - general options, see below for details
    *
    *	optionsObj properties:
    *							validMessage {String} 	- the message to show when the field passes validation (set to '' or false to not insert any message)
@@ -175,8 +175,8 @@ LiveValidation.prototype = {
   /**
    *	adds a validation to perform to a LiveValidation object
    *
-   *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
-   *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+   *	@param validationFunction {Function} - validation function to be used (ie Validate.Presence )
+   *	@param validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    *    @return {Object} - the LiveValidation object itself so that calls can be chained
    */
   add: function(validationFunction, validationParamsObj){
@@ -187,8 +187,8 @@ LiveValidation.prototype = {
   /**
      *	removes a validation from a LiveValidation object - must have exactly the same arguments as used to add it 
      *
-     *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
-     *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+     *	@param validationFunction {Function} - validation function to be used (ie Validate.Presence )
+     *	@param validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
      *  @return {Object} - the LiveValidation object itself so that calls can be chained
      */
   remove: function(validationFunction, validationParamsObj){
@@ -226,8 +226,8 @@ LiveValidation.prototype = {
   /**
    *	gets the type of element, to check whether it is compatible
    *
-   *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
-   *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+   *	@param validationFunction {Function} - validation function to be used (ie Validate.Presence )
+   *	@param validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    */
   getElementType: function(){
 	var nn = this.element.nodeName.toUpperCase();
@@ -255,8 +255,8 @@ LiveValidation.prototype = {
   /**
    *	loops through all the validations added to the LiveValidation object and checks them one by one
    *
-   *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
-   *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+   *	@param validationFunction {Function} - validation function to be used (ie Validate.Presence )
+   *	@param validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    *    @return {Boolean} - whether the all the validations passed or if one failed
    */
   doValidations: function(){
@@ -272,8 +272,8 @@ LiveValidation.prototype = {
   /**
    *	performs validation on the element and handles any error (validation or otherwise) it throws up
    *
-   *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
-   *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+   *	@param validationFunction {Function} - validation function to be used (ie Validate.Presence )
+   *	@param validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    *    @return {Boolean} - whether the validation has passed or failed
    */
   validateElement: function(validationFunction, validationParamsObj){
@@ -380,9 +380,9 @@ LiveValidation.prototype = {
   },
     
   /**
-   *	inserts the element containing the message in place of the element that already exists (if it does)
+   *  inserts the element containing the message in place of the element that already exists (if it does)
    *
-   * @var elementToInsert {HTMLElementObject} - an element node to insert
+   *  @param elementToInsert {HTMLElementObject} - an element node to insert
    */
   insertMessage: function(elementToInsert){
     this.removeMessage();
@@ -400,7 +400,7 @@ LiveValidation.prototype = {
   },
     
   /**
-   *	changes the class of the field based on whether it is valid or not
+   *  changes the class of the field based on whether it is valid or not
    */
   addFieldClass: function(){ 
     this.removeFieldClass();
@@ -422,7 +422,7 @@ LiveValidation.prototype = {
   },
     
   /**
-   *	removes the class that has been applied to the field to indicte if valid or not
+   *  removes the class that has been applied to the field to indicte if valid or not
    */
   removeFieldClass: function(){
     this.element.removeClassName(this.invalidFieldClass);
@@ -430,14 +430,14 @@ LiveValidation.prototype = {
   },
     
   /**
-   *	removes the message and the field class
+   *  removes the message and the field class
    */
   removeMessageAndFieldClass: function(){
     this.removeMessage();
     this.removeFieldClass();
   }
    
-} // end of LiveValidation.prototype object
+}
 
 /*************************************** LiveValidationForm class ****************************************/
 /**
@@ -454,14 +454,14 @@ var LiveValidationForm = Class.create();
 Object.extend(LiveValidationForm, {
 
 	/**
-	 * namespace to hold instances
+	 *  namespace to hold instances
 	 */
 	instances: {},
 	
 	/**
 	   *	gets the instance of the LiveValidationForm if it has already been made or creates it if it doesnt exist
 	   *	
-	   *	@var element {mixed} - a dom element reference to or id of a form
+	   *	@param element {mixed} - a dom element reference to or id of a form
 	   */
 	getInstance: function(element){
 	  if(!element) throw new Error("LiveValidationForm::getInstance - No element reference or element id has been provided!");
@@ -487,7 +487,7 @@ LiveValidationForm.prototype = {
   /**
    *	constructor for LiveValidationForm - handles validation of LiveValidation fields belonging to this form on its submittal
    *	
-   *	@var element {HTMLFormElement} - a dom element reference to the form to turn into a LiveValidationForm
+   *	@param element {HTMLFormElement} - a dom element reference to the form to turn into a LiveValidationForm
    */
   initialize: function(element){
     this.element = $(element);
@@ -510,7 +510,7 @@ LiveValidationForm.prototype = {
   /**
    *	adds a LiveValidation field to the forms fields array
    *	
-   *	@var lvObj {LiveValidation} - a LiveValidation object
+   *	@param lvObj {LiveValidation} - a LiveValidation object
    */
   addField: function(lvObj){
     this.fields.push(lvObj);
@@ -519,16 +519,16 @@ LiveValidationForm.prototype = {
   /**
    *	removes a LiveValidation field from the forms fields array
    *	
-   *	@var victim {LiveValidation} - a LiveValidation object
+   *	@param victim {LiveValidation} - a LiveValidation object
    */
   removeField: function(victim){
 	this.fields = this.fields.without(victim);
   },
   
   /**
-   *	destroy this instance and its events
+   *    destroy this instance and its events
    *
-   * @var force {Boolean} - whether to force the detruction even if there are fields still associated
+   *    @param force {Boolean} - whether to force the detruction even if there are fields still associated
    */
   destroy: function(force){
   	// only destroy if has no fields and not being forced
@@ -540,7 +540,7 @@ LiveValidationForm.prototype = {
 	return true;
   }
    
-}// end of LiveValidationForm prototype
+}
 
 /*************************************** Validate class ****************************************/
 /**
@@ -562,8 +562,8 @@ var Validate = {
   /**
    *	validates that the field has been filled in
    *
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation 
@@ -580,8 +580,8 @@ var Validate = {
   /**
    *	validates that the value is numeric, does not fall within a given range of numbers
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							notANumberMessage {String} - the message to show when the validation fails when value is not a number
@@ -641,8 +641,8 @@ var Validate = {
   /**
    *	validates against a RegExp pattern
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation
@@ -671,8 +671,8 @@ var Validate = {
   /**
    *	validates that the field contains a valid email address
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation
@@ -689,8 +689,8 @@ var Validate = {
   /**
    *	validates the length of the value
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							 wrongLengthMessage {String} - the message to show when the fails when is param is used
@@ -739,8 +739,8 @@ var Validate = {
   /**
    *	validates that the value falls within a given set of values
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation
@@ -791,8 +791,8 @@ var Validate = {
   /**
    *	validates that the value does not fall within a given set of values (shortcut for using Validate.Inclusion with exclusion: true)
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation
@@ -822,8 +822,8 @@ var Validate = {
   /**
    *	validates that the value matches that in another field
    *	
-   *	@var value {mixed} - value to be checked
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation
@@ -845,8 +845,8 @@ var Validate = {
   /**
    *	validates that the value is true (for use primarily in detemining if a checkbox has been checked)
    *	
-   *	@var value {mixed} - value to be checked if true or not (usually a boolean from the checked value of a checkbox)
-   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *	@param value {mixed} - value to be checked if true or not (usually a boolean from the checked value of a checkbox)
+   *	@param paramsObj {Object} - parameters for this particular validation, see below for details
    *
    *	paramsObj properties:
    *							failureMessage {String} - the message to show when the field fails validation 
@@ -863,8 +863,8 @@ var Validate = {
    /**
      *	validates against a custom function that returns true or false (or throws a Validate.Error) when passed the value
      *	
-     *	@var value {mixed} - value to be checked
-     *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+     *	@param value {mixed} - value to be checked
+     *	@param paramsObj {Object} - parameters for this particular validation, see below for details
      *
      *	paramsObj properties:
      *							failureMessage {String} - the message to show when the field fails validation
@@ -887,9 +887,9 @@ var Validate = {
   /**
    *	validates whatever it is you pass in, and handles the validation error for you so it gives a nice true or false reply
    *
-   *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
-   *	@var value {mixed} - value to be checked 
-   *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
+   *	@param validationFunction {Function} - validation function to be used (ie Validate.Presence )
+   *	@param value {mixed} - value to be checked 
+   *	@param validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    */
   now: function(validationFunction, value, validationParamsObj){
     if(!validationFunction) throw new Error("Validate::now - Validation function must be provided!");
@@ -917,4 +917,4 @@ var Validate = {
     throw new Validate.Error(errorMessage);
   }
 
-} // end of Validate object
+}
