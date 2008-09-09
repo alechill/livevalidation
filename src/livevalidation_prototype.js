@@ -54,7 +54,7 @@ LiveValidation.prototype = {
    *	@var optionsObj {Object} - general options, see below for details
    *
    *	optionsObj properties:
-   *							validMessage {String} 	- the message to show when the field passes validation
+   *							validMessage {String} 	- the message to show when the field passes validation (set to '' or false to not insert any message)
    *													  (DEFAULT: "Thankyou!")
    *                            beforeValidation {Function} - function to execute directly before validation is performed
    *													  (DEFAULT: function(){})
@@ -177,7 +177,7 @@ LiveValidation.prototype = {
    *
    *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
    *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
-   * @return {Object} - the LiveValidation object itself so that calls can be chained
+   *    @return {Object} - the LiveValidation object itself so that calls can be chained
    */
   add: function(validationFunction, validationParamsObj){
     this.validations.push( { type: validationFunction, params: validationParamsObj || {} } );
@@ -189,7 +189,7 @@ LiveValidation.prototype = {
      *
      *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
      *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
-     * @return {Object} - the LiveValidation object itself so that calls can be chained
+     *  @return {Object} - the LiveValidation object itself so that calls can be chained
      */
   remove: function(validationFunction, validationParamsObj){
 	this.validations = this.validations.reject(function(v){
@@ -230,23 +230,23 @@ LiveValidation.prototype = {
    *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
    */
   getElementType: function(){
-	var nn = this.element.nodeName;
-	var nt = this.element.type;
+	var nn = this.element.nodeName.toUpperCase();
+	var nt = this.element.type.toUpperCase();
     switch(true){
-      case (nn.toUpperCase() == 'TEXTAREA'):
+      case (nn == 'TEXTAREA'):
         return LiveValidation.TEXTAREA;
-      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'TEXT'):
+      case (nn == 'INPUT' && nt == 'TEXT'):
         return LiveValidation.TEXT;
-      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'PASSWORD'):
+      case (nn == 'INPUT' && nt == 'PASSWORD'):
         return LiveValidation.PASSWORD;
-      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'CHECKBOX'):
+      case (nn == 'INPUT' && nt == 'CHECKBOX'):
         return LiveValidation.CHECKBOX;
-      case (nn.toUpperCase() == 'INPUT' && nt.toUpperCase() == 'FILE'):
+      case (nn == 'INPUT' && nt == 'FILE'):
         return LiveValidation.FILE;
-      case (nn.toUpperCase() == 'SELECT'):
+      case (nn == 'SELECT'):
         return LiveValidation.SELECT;
-      case (nn.toUpperCase() == 'INPUT'):
-        throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + nt + ' input!');
+      case (nn == 'INPUT'):
+        throw new Error('LiveValidation::getElementType - Cannot use LiveValidation on an ' + nt.toLowerCase() + ' input!');
       default:
         throw new Error('LiveValidation::getElementType - Element must be an input, select, or textarea - ' + nn.toLowerCase() + ' was given!');
     }
@@ -257,23 +257,12 @@ LiveValidation.prototype = {
    *
    *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
    *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
-   * @return {Boolean} - whether the all the validations passed or if one failed
+   *    @return {Boolean} - whether the all the validations passed or if one failed
    */
   doValidations: function(){
     this.validationFailed = false;
     for(var i = 0, len = this.validations.length; i < len; ++i){
-      var v = this.validations[i];
-	  switch(v.type){
-   		case Validate.Presence:
-        case Validate.Confirmation:
-        case Validate.Acceptance:
-    	  this.displayMessageWhenEmpty = true;
-    	  break;
-		case Validate.Custom:
-	      if(v.params.displayMessageWhenEmpty) this.displayMessageWhenEmpty = true;
-		  break;
-      }
-	  this.validationFailed = !this.validateElement(v.type, v.params);
+	  this.validationFailed = !this.validateElement(this.validations[i].type, this.validations[i].params);
       if(this.validationFailed) return false;	
     }
     this.message = this.validMessage;
@@ -285,14 +274,27 @@ LiveValidation.prototype = {
    *
    *	@var validationFunction {Function} - validation function to be used (ie Validate.Presence )
    *	@var validationParamsObj {Object} - parameters for doing the validation, if wanted or necessary
-   * @return {Boolean} - whether the validation has passed or failed
+   *    @return {Boolean} - whether the validation has passed or failed
    */
   validateElement: function(validationFunction, validationParamsObj){
+  	// check whether we should display the message when empty
+	switch(validationFunction){
+    	case Validate.Presence:
+        case Validate.Confirmation:
+        case Validate.Acceptance:
+    		this.displayMessageWhenEmpty = true;
+    		break;
+		case Validate.Custom:
+			if(validationParamsObj.displayMessageWhenEmpty) this.displayMessageWhenEmpty = true;
+			break;
+    }
+	// select and checkbox elements values are handled differently
     var value = (this.elementType == LiveValidation.SELECT) ? this.element.options[this.element.selectedIndex].value : this.element.value;     
     if(validationFunction == Validate.Acceptance){
       if(this.elementType != LiveValidation.CHECKBOX) throw new Error('LiveValidation::validateElement - Element to validate acceptance must be a checkbox!');
       value = this.element.checked;
     }
+	// now validate
     var isValid = true;
     try{    
       validationFunction(value, validationParamsObj);
@@ -314,7 +316,7 @@ LiveValidation.prototype = {
   /**
    *	makes it do the all the validations and fires off the various callbacks
    *
-   * @return {Boolean} - whether the all the validations passed or if one failed
+   *    @return {Boolean} - whether the all the validations passed or if one failed
    */
   validate: function(){
   	if(!this.element.disabled){
@@ -368,7 +370,7 @@ LiveValidation.prototype = {
   /**
    *	makes a span containg the passed or failed message
    *
-   * @return {HTMLSpanObject} - a span element with the message in it
+   *    @return {HTMLSpanObject} - a span element with the message in it
    */
   createMessageSpan: function(){
     var span = document.createElement('span');
@@ -384,7 +386,7 @@ LiveValidation.prototype = {
    */
   insertMessage: function(elementToInsert){
     this.removeMessage();
-    if(!this.validationFailed && !this.validMessage) return; // dont insert anything if vaalidMesssage has been set to false
+    if(!this.validationFailed && !this.validMessage) return; // dont insert anything if validMesssage has been set to false or empty string
     if( (this.displayMessageWhenEmpty && (this.elementType == LiveValidation.CHECKBOX || this.element.value == '')) || this.element.value != '' ){
       var className = this.validationFailed ? this.invalidClass : this.validClass;
 	  $(elementToInsert).addClassName( this.messageClass + ' ' + className );

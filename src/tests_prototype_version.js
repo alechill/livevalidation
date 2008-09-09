@@ -824,7 +824,13 @@ function runTests(){
         // test that it will fail if should fail and has a value in the field
         subjects.lv.element.value = 'howdy';
         assertEqual(false, subjects.lv.validateElement(Validate.Format, { pattern: /hello/i}), "Validation should fail and return false for a non-empty field with an invalid value with Validate.Format only");
-    }},
+    	//test that if you pass a Validate.Custom without displayMessageWhenEmpty option, then it will not run the validation (and so return true)
+		subjects.lv.element.value = '';
+		var areYouFrench = function(value, argsObj){ return value == 'oui'; }
+		assert(subjects.lv.validateElement(Validate.Custom, { against: areYouFrench }), "Validation should not fail (as it should not be run) for an empty field with a Custom validation when it has not been given displayMessageWhenEmpty option");
+		//test that if you pass a Validate.Custom with displayMessageWhenEmpty option, then it will run the validation (we will pass it one that will fail)
+		assertEqual(false, subjects.lv.validateElement(Validate.Custom, { against: areYouFrench, displayMessageWhenEmpty: true }), "Validation should fail and return false for an empty field with a Custom validation set up to fail on empty when it has been given displayMessageWhenEmpty option");
+	}},
     
     testDoValidations: function(){ with(this){
         subjects.lv.add(Validate.Presence);
