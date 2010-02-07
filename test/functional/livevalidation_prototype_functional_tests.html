@@ -314,6 +314,25 @@ custom failureMessage each time you want to validate an email.</p>
 		  </script>  
 	  </p>
 	</div>
+	
+	<div class="section" id="exampleRemote">
+		 <h3>Remote</h3>
+		 <p>Remote will fail if the AJAX response doesn't return true. Remote validations are only performed after leaving the field to stop multiple requests being fired uneccessarily.</p>
+		 <p>Entering anything in this field then clicking elsewhere should return a valid AJAX response: 
+		   <input type="text" id="f101" />
+		   <script type="text/javascript">
+		     var f101 = new LiveValidation('f101');
+		     f101.add(Validate.Remote, {url: 'valid_response.txt'});
+		   </script>  
+		 </p>
+		 <p>Entering anything in this field then clicking elsewhere should return an invalid AJAX response: 
+		   <input type="text" id="f102" />
+		   <script type="text/javascript">
+		     var f102 = new LiveValidation('f102');
+		     f102.add(Validate.Remote, {url: 'invalid_response.txt'});
+		   </script>  
+		 </p>
+	  </div>
   
   <div class="section" id="exampleComposite">
 	  <h3>Composite validations (combining validations)</h3>

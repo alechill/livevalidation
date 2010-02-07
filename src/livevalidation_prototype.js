@@ -119,6 +119,8 @@ LiveValidation.prototype = {
 	// event callbacks are cached so they can be stopped being observed
 	this.cFocus = this.doOnFocus.bindAsEventListener(this);
     Event.observe(this.element, 'focus', this.cFocus);
+    this.cBlur = this.doOnBlur.bindAsEventListener(this);
+	Event.observe(this.element, 'blur', this.cBlur);
     if(!this.onlyOnSubmit){
       switch(this.elementType){
         case LiveValidation.CHECKBOX:
@@ -135,8 +137,6 @@ LiveValidation.prototype = {
 		  	this.cKeyup = this.deferValidation.bindAsEventListener(this);
 		  	Event.observe(this.element, 'keyup', this.cKeyup);
 		  }
-          this.cBlur = this.validate.bindAsEventListener(this);
-		  Event.observe(this.element, 'blur', this.cBlur);
       }
     }
   },
@@ -154,6 +154,7 @@ LiveValidation.prototype = {
     // remove events
 	var el = this.element;
     Event.stopObserving(el, 'focus', this.cFocus);
+    Event.stopObserving(el, 'blur', this.cBlur);
     if(!this.onlyOnSubmit){
       switch(this.elementType){
         case LiveValidation.CHECKBOX:
@@ -165,7 +166,6 @@ LiveValidation.prototype = {
           break;
         default:
           if(!this.onlyOnBlur) Event.stopObserving(el, 'keyup', this.cKeyup);
-          Event.stopObserving(el, 'blur', this.cBlur);
       }
     }
     this.validations = [];
@@ -180,7 +180,25 @@ LiveValidation.prototype = {
    *    @return {Object} - the LiveValidation object itself so that calls can be chained
    */
   add: function(validationFunction, validationParamsObj){
+	// if Validate.Remote must make it run the LiveValidation hooks when AJAX responds
+	if(validationFunction == Validate.Remote){
+		validationParamsObj.onResponse = function(valid, paramsUsed){
+			this.validationFailed = !valid;
+			if(valid){
+				this.message = this.validMessage;
+				this.beforeValid();
+				this.onValid();
+				this.afterValid();
+			}else{
+				this.message = paramsUsed.failureMessage;
+				this.beforeInvalid();
+	        	this.onInvalid();
+				this.afterInvalid();
+			}
+		}.bind(this);
+	}
     this.validations.push( { type: validationFunction, params: validationParamsObj || {} } );
+	// @todo - do not want to send AJAX request with value we already know is invalid, so move all Remote validations to the back of the stack
     return this;
   },
   
@@ -262,8 +280,8 @@ LiveValidation.prototype = {
   doValidations: function(){
     this.validationFailed = false;
     for(var i = 0, len = this.validations.length; i < len; ++i){
-	  this.validationFailed = !this.validateElement(this.validations[i].type, this.validations[i].params);
-      if(this.validationFailed) return false;	
+		this.validationFailed = !this.validateElement(this.validations[i].type, this.validations[i].params);
+	  	if(this.validationFailed) return false;	
     }
     this.message = this.validMessage;
     return true;
@@ -294,6 +312,11 @@ LiveValidation.prototype = {
       if(this.elementType != LiveValidation.CHECKBOX) throw new Error('LiveValidation::validateElement - Element to validate acceptance must be a checkbox!');
       value = this.element.checked;
     }
+	// if empty and a Remote validation, we dont even bother sending the request...should apply a Presence as well if required
+	// if focused then validation is running on a keyup, so dont send otherwise will fire multiple AJAX requests -  let it happen once on blur
+	if( validationFunction == Validate.Remote){
+		if(value === '' || this.focused ) return true;
+	}
 	// now validate
     var isValid = true;
     try{    
@@ -402,7 +425,7 @@ LiveValidation.prototype = {
   /**
    *  changes the class of the field based on whether it is valid or not
    */
-  addFieldClass: function(){ 
+  addFieldClass: function(){
     this.removeFieldClass();
     if(!this.validationFailed){
       if(this.displayMessageWhenEmpty || this.element.value != ''){
@@ -883,7 +906,47 @@ var Validate = {
     if(!params.against(value, params.args)) Validate.fail(params.failureMessage);
     return true;
   },
-    
+  
+	/**
+   *	validates a value against a remote function, passing 'value' parameter, response should be true for a valid value
+   *
+   *	@var value {mixed} - value to be checked
+   *	@var paramsObj {Object} - parameters for this particular validation, see below for details
+   *
+   *	paramsObj properties:
+   *							failureMessage {String} - the message to show when the field fails validation 
+   *													  (DEFAULT: "Already been taken!")
+   *              				loadingMessage {String} - the message to show when the call is being made
+   *													  (DEFAULT: "Checking, please wait...")
+   *              				requestParamsObj {Object} - parameters for the ajax request (see Prototype.js api for options)
+   *							url {String} 			- the url to send the request to
+   *													  (DEFAULT: "")
+   *							onResponse {Function} 	- a function to perform on response (passes whether valid, and params used)
+   *													  (DEFAULT: function(valid, paramsUsed){})
+   */
+  Remote: function(value, paramsObj){
+    var params = Object.extend({
+		url: '',
+  		failureMessage: "Already been taken!",
+		loadingMessage: "Checking, please wait...",
+		onResponse: function(valid){}
+  	}, paramsObj || {});
+	var request = new Ajax.Request( 
+	  	params.url, 
+		Object.extend({ 
+			method: 'get',
+			parameters: { value: value },
+			onSuccess: function(transport){
+			  	var valid = Validate.now( Validate.Inclusion, transport.responseText, { within: [true, 'true', 1, '1'] } );
+				params.onResponse(valid, params);
+			},
+			onFailed: function(){ throw new Error("Validate::Remote - Error: request failed") }
+		}, params.requestParamsObj || {} )
+	);
+	// fail to show loading message until ajax returns response and does something else
+	Validate.fail(params.loadingMessage);
+  },
+
   /**
    *	validates whatever it is you pass in, and handles the validation error for you so it gives a nice true or false reply
    *
