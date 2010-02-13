@@ -1,5 +1,5 @@
 // LiveValidation 1.4 (prototype.js version)
-// Copyright (c) 2007-2008 Alec Hill (www.livevalidation.com)
+// Copyright (c) 2007-2010 Alec Hill (www.livevalidation.com)
 // LiveValidation is licensed under the terms of the MIT License
 
 var LiveValidation = Class.create();
@@ -301,8 +301,9 @@ LiveValidation.prototype = {
     } catch(error) {
       if(error instanceof Validate.Error){
         if( value !== '' || (value === '' && this.displayMessageWhenEmpty) ){
-          this.validationFailed = true;
-          this.message = error.message;
+          this.validationFailed = true;	
+		  // Opera 10 adds stacktrace after newline
+          this.message = error.message.split('\n')[0];
           isValid = false;
         }
       }else{
