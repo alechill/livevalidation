@@ -240,6 +240,8 @@ LiveValidation.prototype = {
 	        return LiveValidation.TEXTAREA;
 	      case (nn == 'INPUT' && nt == 'TEXT'):
 	        return LiveValidation.TEXT;
+	      case (nn == 'INPUT' && (nt == 'EMAIL' || nt == 'URL' || nt == 'TEL' || nt == 'NUMBER' || nt == 'RANGE')):
+	        return LiveValidation.TEXT;
 	      case (nn == 'INPUT' && nt == 'PASSWORD'):
 	        return LiveValidation.PASSWORD;
 	      case (nn == 'INPUT' && nt == 'CHECKBOX'):
