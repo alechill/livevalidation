@@ -686,6 +686,47 @@ var Validate = {
     Validate.Format(value, { failureMessage: params.failureMessage, pattern: /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i } );
     return true;
   },
+	
+	/**
+	 * validates that the field contains a valid date or date time, also compares date against a supplied value
+	 * 
+	 * @param value {mixed} - value to be checked
+	 * @param paramsObj {Object{ - parameters for this particular validation, see below for details
+	 * 
+	 * pramsObj properties:
+	 *							failureMessage {String} - the message to show when the field fails validation
+     *													  (DEFAULT: "Must be valid date!")
+	 *							tooEarlyMessage {String} - the message to show when the field fails when earliestDate date param is used
+     *													  (DEFAULT: "Must be valid date!")
+	 *							tooLateMessage {String} - the message to show when the field fails when latestDate date param is used
+     *													  (DEFAULT: "Must be valid date!")
+	 *							earliestDate {String} - the earliest date allowed
+     *													  (DEFAULT: null)
+	 *							latestDate {String} - the latest date allowed
+     *													  (DEFAULT: null)
+	 * 
+	 */
+	Date: function(value, paramsObj){
+		var paramsObj = paramsObj || {};
+		var params = {
+			message: paramsObj.failureMessage || "Must be a valid date!",
+			tooEarlyMessage: paramsObj.tooEarlyMessage || "Too early!",
+			tooLateMessage: paramsObj.tooLateMessage || "Too late!",
+			earliestDate: paramsObj.earliestDate || null,
+			latestDate: paramsObj.latestDate || null,
+		};
+		
+		var dateObj = new Date(value);
+		var earlyDateObj = new Date(params.earliestDate);
+		var lateDateObj = new Date(params.latestDate);
+		//var currentDateObj = new Date(); //Unused.  Left to provoke thought on improvements to this validation
+		
+		if (isNaN(dateObj.getDate())) Validate.fail(params.message);
+		if (earliestDate && dateObj < earlyDateObj) Validate.fail(params.tooEarlyMessage);
+		if (latestDate && dateObj > lateDateObj) Validate.fail(params.tooLateMessage);
+		
+		return true;
+	},
     
   /**
    *	validates the length of the value
