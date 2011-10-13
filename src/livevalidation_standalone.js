@@ -96,7 +96,7 @@ LiveValidation.prototype = {
       this.form = this.element.form;
       // options
       var options = optionsObj || {};
-      this.validMessage = options.validMessage || 'Thankyou!';
+      this.validMessage = (options.validMessage === false || options.validMessage === '' || options.validMessage)? options.validMessage : 'Thankyou!';
       var node = options.insertAfterWhatNode || this.element;
 	  this.insertAfterWhatNode = node.nodeType ? node : document.getElementById(node);
       this.onlyOnBlur =  options.onlyOnBlur || false;
