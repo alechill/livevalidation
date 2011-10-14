@@ -459,6 +459,45 @@ function runTests(){
             }
         }
     }},
+
+	testValidateDate: function() { with(this) {
+		var bad = 'asdfa3vze';
+		var charlemagne = '12/25/800';
+		var independence = '06/04/1776';
+		var constitution = '09/17/1789';
+
+		try{
+			assertNotEqual(true, Validate.Date(bad));
+		}catch(error){
+		    assertEqual('ValidationError', error.name);
+		    if(error.name == 'ValidationError'){
+		        assertEqual("Must be a valid date!", error.message);
+		    }else{
+		        throw error;
+		    }
+		}
+		assert(Validate.Date(charlemagne));
+		try{
+			assertNotEqual(true, Validate.Date(independence, {earliestDate: constitution}));
+		}catch(error){
+		    assertEqual('ValidationError', error.name);
+		    if(error.name == 'ValidationError'){
+		        assertEqual("Too early!", error.message);
+		    }else{
+		        throw error;
+		    }
+		}
+		try{
+			assertNotEqual(true, Validate.Date(independence, {latestDate: charlemagne}));
+		}catch(error){
+		    assertEqual('ValidationError', error.name);
+		    if(error.name == 'ValidationError'){
+		        assertEqual("Too late!", error.message);
+		    }else{
+		        throw error;
+		    }
+		}
+	}},
     
     testValidateLength: function() { with(this) {
         var myIs = 11;
@@ -1128,6 +1167,7 @@ function runTests(){
 	 testRemoveFromFieldsLiveValidationFormOnDestroy: function() { with(this) {
 		subjects.lv2 = new LiveValidation('myCheckbox');
 		var lvF = subjects.lv.formObj;
+
 		subjects.lv.destroy();
 		assertEqual(1, lvF.fields.length );
 		subjects.lv2.destroy();
