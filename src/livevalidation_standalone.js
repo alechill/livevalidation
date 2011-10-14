@@ -708,9 +708,9 @@ var Validate = {
 	 *							failureMessage {String} - the message to show when the field fails validation
      *													  (DEFAULT: "Must be valid date!")
 	 *							tooEarlyMessage {String} - the message to show when the field fails when earliestDate date param is used
-     *													  (DEFAULT: "Must be valid date!")
+     *													  (DEFAULT: "Too early!")
 	 *							tooLateMessage {String} - the message to show when the field fails when latestDate date param is used
-     *													  (DEFAULT: "Must be valid date!")
+     *													  (DEFAULT: "Too late!")
 	 *							earliestDate {String} - the earliest date allowed
      *													  (DEFAULT: null)
 	 *							latestDate {String} - the latest date allowed

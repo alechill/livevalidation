@@ -697,9 +697,9 @@ var Validate = {
 	 *							failureMessage {String} - the message to show when the field fails validation
      *													  (DEFAULT: "Must be valid date!")
 	 *							tooEarlyMessage {String} - the message to show when the field fails when earliestDate date param is used
-     *													  (DEFAULT: "Must be valid date!")
+     *													  (DEFAULT: "Too early!")
 	 *							tooLateMessage {String} - the message to show when the field fails when latestDate date param is used
-     *													  (DEFAULT: "Must be valid date!")
+     *													  (DEFAULT: "Too late!")
 	 *							earliestDate {String} - the earliest date allowed
      *													  (DEFAULT: null)
 	 *							latestDate {String} - the latest date allowed
@@ -722,8 +722,8 @@ var Validate = {
 		//var currentDateObj = new Date(); //Unused.  Left to provoke thought on improvements to this validation
 		
 		if (isNaN(dateObj.getDate())) Validate.fail(params.message);
-		if (earliestDate && dateObj < earlyDateObj) Validate.fail(params.tooEarlyMessage);
-		if (latestDate && dateObj > lateDateObj) Validate.fail(params.tooLateMessage);
+		if (params.earliestDate && dateObj < earlyDateObj) Validate.fail(params.tooEarlyMessage);
+		if (params.latestDate && dateObj > lateDateObj) Validate.fail(params.tooLateMessage);
 		
 		return true;
 	},
