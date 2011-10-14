@@ -715,6 +715,10 @@ var Validate = {
      *													  (DEFAULT: null)
 	 *							latestDate {String} - the latest date allowed
      *													  (DEFAULT: null)
+	 *							isPast {Boolean} - if true, field fails when value is in the future
+     *													  (DEFAULT: false)
+	 *							isFuture {Boolean} - if true, field fails when value is in the past
+     *													  (DEFAULT: false)
 	 * 
 	 */
 	Date: function(value, paramsObj){
@@ -724,15 +728,19 @@ var Validate = {
 		var tooLateMessage = paramsObj.tooLateMessage || "Too late!";
 		var earliestDate = paramsObj.earliestDate || null;
 		var latestDate = paramsObj.latestDate || null;
+		var isPast = paramsObj.isPast || false;
+		var isFuture = paramsObj.isFuture || false;
 		
 		var dateObj = new Date(value);
 		var earlyDateObj = new Date(earliestDate);
 		var lateDateObj = new Date(latestDate);
-		//var currentDateObj = new Date(); //Unused.  Left to provoke thought on improvements to this validation
+		var currentDateObj = new Date();
 		
 		if (isNaN(dateObj.getDate())) Validate.fail(message);
 		if (earliestDate && dateObj < earlyDateObj) Validate.fail(tooEarlyMessage);
 		if (latestDate && dateObj > lateDateObj) Validate.fail(tooLateMessage);
+		if (isPast && dateObj > currentDateObj) Validate.fail(tooEarlyMessage);
+		if (isFuture && dateObj < currentDateObj) Validate.fail(tooLateMessage);
 		
 		return true;
 	},

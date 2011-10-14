@@ -465,6 +465,7 @@ function runTests(){
 		var charlemagne = '12/25/800';
 		var independence = '06/04/1776';
 		var constitution = '09/17/1789';
+		var firstContact =  '04/05/2063';
 
 		try{
 			assertNotEqual(true, Validate.Date(bad));
@@ -489,6 +490,26 @@ function runTests(){
 		}
 		try{
 			assertNotEqual(true, Validate.Date(independence, {latestDate: charlemagne}));
+		}catch(error){
+		    assertEqual('ValidationError', error.name);
+		    if(error.name == 'ValidationError'){
+		        assertEqual("Too late!", error.message);
+		    }else{
+		        throw error;
+		    }
+		}
+		try{
+			assertNotEqual(true, Validate.Date(firstContact, {isPast: true}));
+		}catch(error){
+		    assertEqual('ValidationError', error.name);
+		    if(error.name == 'ValidationError'){
+		        assertEqual("Too early!", error.message);
+		    }else{
+		        throw error;
+		    }
+		}
+		try{
+			assertNotEqual(true, Validate.Date(independence, {isFuture: true}));
 		}catch(error){
 		    assertEqual('ValidationError', error.name);
 		    if(error.name == 'ValidationError'){
