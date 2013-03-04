@@ -697,6 +697,53 @@ var Validate = {
     	Validate.Format(value, { failureMessage: message, pattern: /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i } );
     	return true;
     },
+	
+	/**
+	 * validates that the field contains a valid date or date time, also compares date against a supplied value
+	 * 
+	 * @param value {mixed} - value to be checked
+	 * @param paramsObj {Object{ - parameters for this particular validation, see below for details
+	 * 
+	 * pramsObj properties:
+	 *							failureMessage {String} - the message to show when the field fails validation
+     *													  (DEFAULT: "Must be valid date!")
+	 *							tooEarlyMessage {String} - the message to show when the field fails when earliestDate date param is used
+     *													  (DEFAULT: "Too early!")
+	 *							tooLateMessage {String} - the message to show when the field fails when latestDate date param is used
+     *													  (DEFAULT: "Too late!")
+	 *							earliestDate {String} - the earliest date allowed
+     *													  (DEFAULT: null)
+	 *							latestDate {String} - the latest date allowed
+     *													  (DEFAULT: null)
+	 *							isPast {Boolean} - if true, field fails when value is in the future
+     *													  (DEFAULT: false)
+	 *							isFuture {Boolean} - if true, field fails when value is in the past
+     *													  (DEFAULT: false)
+	 * 
+	 */
+	Date: function(value, paramsObj){
+		var paramsObj = paramsObj || {};
+		var message = paramsObj.failureMessage || "Must be a valid date!";
+		var tooEarlyMessage = paramsObj.tooEarlyMessage || "Too early!";
+		var tooLateMessage = paramsObj.tooLateMessage || "Too late!";
+		var earliestDate = paramsObj.earliestDate || null;
+		var latestDate = paramsObj.latestDate || null;
+		var isPast = paramsObj.isPast || false;
+		var isFuture = paramsObj.isFuture || false;
+		
+		var dateObj = new Date(value);
+		var earlyDateObj = new Date(earliestDate);
+		var lateDateObj = new Date(latestDate);
+		var currentDateObj = new Date();
+		
+		if (isNaN(dateObj.getDate())) Validate.fail(message);
+		if (earliestDate && dateObj < earlyDateObj) Validate.fail(tooEarlyMessage);
+		if (latestDate && dateObj > lateDateObj) Validate.fail(tooLateMessage);
+		if (isPast && dateObj > currentDateObj) Validate.fail(tooEarlyMessage);
+		if (isFuture && dateObj < currentDateObj) Validate.fail(tooLateMessage);
+		
+		return true;
+	},
     
     /**
      *	validates the length of the value
