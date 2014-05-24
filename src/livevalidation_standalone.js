@@ -330,14 +330,15 @@ LiveValidation.prototype = {
 			this.beforeValid();
 			this.onValid();
 			this.afterValid();
+			this.afterValidation();
 			return true;
 		}else {
 			this.beforeInvalid();
 			this.onInvalid();
 			this.afterInvalid();
+			this.afterValidation();
 			return false;
 		}
-		this.afterValidation();
 	  }else{
       	return true;
       }
